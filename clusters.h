@@ -31,8 +31,8 @@
 
 #define ON_OFF_CLUSTER_ID                           	0x0006
 #define ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF               0x0000
-#define ON_OFF_CLUSTER_ON_COMMAND                     0x00
-#define ON_OFF_CLUSTER_OFF_COMMAND                    0x01
+#define ON_OFF_CLUSTER_OFF_COMMAND                    0x00
+#define ON_OFF_CLUSTER_ON_COMMAND                     0x01
 #define ON_OFF_CLUSTER_TOGGLE_COMMAND                 0x02
 
 class ZHA_Cluster { 

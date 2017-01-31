@@ -1,5 +1,8 @@
 #include <SoftwareSerial.h>
+#include <Bounce2.h>
 #include "device.h"
+
+#define DEBUG
 
 class arduinoLED : public OnOffCluster {
   void on() { digitalWrite(13, HIGH); } 
@@ -11,57 +14,32 @@ BasicCluster basic_cluster;
 IdentifyCluster identify_cluster;
 arduinoLED led_cluster;
 
-ZHA_Endpoint lightswitch;
-SoftwareSerial nss(8,9);
+Bounce debouncer = Bounce();
+
+ZHA_Endpoint lightswitch(0x08);
+SoftwareSerial nss(12,14);
 ZHA_Device device;
 
-void sendAT(String at) {
-  if (at == "+++") { 
-    nss.print(at);
-  } else {
-    nss.println(at);
-  }
-  while (nss.available() == 0) {}
-  Serial.println(nss.readString());
-}
-
-void initializeModem() {
-  sendAT("+++");
-  sendAT("ATEE0");
-  sendAT("ATEO0");
-  sendAT("ATAP0");
-  sendAT("ATAO0");
-  sendAT("ATWR");
-  sendAT("ATAC");
-  sendAT("ATCN");
-
-  sendAT("+++");
-  sendAT("ATZS2");
-  sendAT("ATAP2");
-  sendAT("ATAO3");
-  sendAT("ATEE1");
-  sendAT("ATEO2");
-  sendAT("ATKY5A6967426565416C6C69616E63653039");
-  sendAT("ATWR");
-  sendAT("ATAC");
-  sendAT("ATCN");
-  Serial.println("setup done");
-}
-
 void setup() {
+  Serial.begin(115200);
+
   lightswitch.addInCluster(&basic_cluster);
   lightswitch.addInCluster(&identify_cluster);
   lightswitch.addInCluster(&led_cluster);
   device.addEndpoint(&lightswitch);
 
   pinMode(13, OUTPUT);
-  Serial.begin(9600);
-  nss.begin(9600);
-  initializeModem();
+  pinMode(16, INPUT);
+  debouncer.attach(16);
+  debouncer.interval(5);
+  nss.begin(57600);
   device.setSerial(nss);
+  device.initializeModem();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  if (debouncer.update() && debouncer.read() == LOW) {
+    digitalWrite(13, digitalRead(13) ^ 1);
+  }
   device.loop();
 }

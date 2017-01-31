@@ -865,7 +865,7 @@ bool XBee::readPacket(int timeout) {
     while (int((millis() - start)) < timeout) {
 
      	readPacket();
-
+      Serial.println();
      	if (getResponse().isAvailable()) {
      		return true;
      	} else if (getResponse().isError()) {
@@ -878,16 +878,15 @@ bool XBee::readPacket(int timeout) {
 }
 
 void XBee::readPacket() {
+  uint8_t recv = 0;
 	// reset previous response
 	if (_response.isAvailable() || _response.isError()) {
 		// discard previous packet and start over
 		resetResponse();
 	}
-
     while (available()) {
 
         b = read();
-
         if (_pos > 0 && b == START_BYTE && ATAP == 2) {
         	// new packet start before previous packeted completed -- discard previous packet and start over
         	_response.setErrorCode(UNEXPECTED_START_BYTE);
@@ -969,7 +968,6 @@ void XBee::readPacket() {
 
 					// reset state vars
 					_pos = 0;
-
 					return;
 				} else {
 					// add to packet array, starting with the fourth byte of the apiFrame

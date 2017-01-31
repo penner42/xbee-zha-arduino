@@ -6,7 +6,7 @@
 class ZHA_Endpoint {
 public:
 //  ZHA_Endpoint(uint8_t endpointId, ZHA_Cluster **inClusters, uint8_t numInClusters, ZHA_Cluster **outClusters, uint8_t numOutClusters);
-  ZHA_Endpoint() { };
+  ZHA_Endpoint(uint8_t endpointId) { _endpointId = endpointId; }
   void addInCluster(ZHA_Cluster *inCluster);
   void addOutCluster(ZHA_Cluster *outCluster);
   
