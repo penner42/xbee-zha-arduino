@@ -50,6 +50,20 @@ IdentifyCluster::IdentifyCluster() {
   _clusterId = IDENTITY_CLUSTER_ID;
 }
 
+GroupsCluster::GroupsCluster() {
+  _attrs.add(new Attribute(GROUPS_CLUSTER_ATTRIBUTE_NAME_SUPPORT, ZHA_TYPE_8BIT_BITMAP, 0x0000));
+  _clusterId = GROUPS_CLUSTER_ID;
+}
+
+ScenesCluster::ScenesCluster() {
+  _attrs.add(new Attribute(SCENES_CLUSTER_ATTRIBUTE_SCENE_COUNT,   ZHA_TYPE_UINT8,  0x00));
+  _attrs.add(new Attribute(SCENES_CLUSTER_ATTRIBUTE_CURRENT_SCENE, ZHA_TYPE_UINT8,  0x00));
+  _attrs.add(new Attribute(SCENES_CLUSTER_ATTRIBUTE_CURRENT_GROUP, ZHA_TYPE_UINT16, 0x0000));
+  _attrs.add(new Attribute(SCENES_CLUSTER_ATTRIBUTE_SCENE_VALID,   ZHA_TYPE_BOOL,   0x00));
+  _attrs.add(new Attribute(SCENES_CLUSTER_ATTRIBUTE_NAME_SUPPORT,  ZHA_TYPE_8BIT_BITMAP, 0x0000));
+  _clusterId = SCENES_CLUSTER_ID;
+}
+
 OnOffCluster::OnOffCluster() {
   /* mandatory attributes, default values */
   _attrs.add(new Attribute(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF, ZHA_TYPE_BOOL, 0x0));

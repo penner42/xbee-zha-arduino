@@ -29,6 +29,16 @@
 #define IDENTITY_CLUSTER_ID                           0x0003
 #define IDENTITY_CLUSTER_ATTRIBUTE_IDENTIFY_TIME      0x0000
 
+#define GROUPS_CLUSTER_ID                             0x0004
+#define GROUPS_CLUSTER_ATTRIBUTE_NAME_SUPPORT         0x0000
+
+#define SCENES_CLUSTER_ID                             0x0005
+#define SCENES_CLUSTER_ATTRIBUTE_SCENE_COUNT          0x0000
+#define SCENES_CLUSTER_ATTRIBUTE_CURRENT_SCENE        0x0001
+#define SCENES_CLUSTER_ATTRIBUTE_CURRENT_GROUP        0x0002
+#define SCENES_CLUSTER_ATTRIBUTE_SCENE_VALID          0x0003
+#define SCENES_CLUSTER_ATTRIBUTE_NAME_SUPPORT         0x0004
+
 #define ON_OFF_CLUSTER_ID                           	0x0006
 #define ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF               0x0000
 #define ON_OFF_CLUSTER_OFF_COMMAND                    0x00
@@ -64,6 +74,22 @@ private:
 class IdentifyCluster : public ZHA_Cluster {
 public:
   IdentifyCluster();
+
+private:
+  void processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
+};
+
+class GroupsCluster : public ZHA_Cluster {
+public:
+  GroupsCluster();
+
+private:
+  void processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
+};
+
+class ScenesCluster : public ZHA_Cluster {
+public:
+  ScenesCluster();
 
 private:
   void processCommand(uint8_t *frameData, uint8_t frameDataLength) { };

@@ -11,6 +11,7 @@
 #define ZHA_TYPE_UINT48 0x25
 #define ZHA_TYPE_UINT56 0x26
 #define ZHA_TYPE_UINT64 0x27
+#define ZHA_TYPE_8BIT_BITMAP      0x18
 #define ZHA_TYPE_8BIT_ENUMERATION 0x30
 #define ZHA_TYPE_CHARACTER_STRING 0x42
 
@@ -36,6 +37,8 @@ public:
         break;
       case ZHA_TYPE_BOOL:
       case ZHA_TYPE_UINT8:
+      case ZHA_TYPE_8BIT_ENUMERATION:
+      case ZHA_TYPE_8BIT_BITMAP:
         return 1;
         break;
       case ZHA_TYPE_UINT16:

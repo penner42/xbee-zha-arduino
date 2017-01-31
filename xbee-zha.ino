@@ -12,6 +12,8 @@ class arduinoLED : public OnOffCluster {
 
 BasicCluster basic_cluster;
 IdentifyCluster identify_cluster;
+GroupsCluster groups_cluster;
+ScenesCluster scenes_cluster;
 arduinoLED led_cluster;
 
 Bounce debouncer = Bounce();
@@ -25,6 +27,8 @@ void setup() {
 
   lightswitch.addInCluster(&basic_cluster);
   lightswitch.addInCluster(&identify_cluster);
+  lightswitch.addInCluster(&groups_cluster);
+  lightswitch.addInCluster(&scenes_cluster);
   lightswitch.addInCluster(&led_cluster);
   device.addEndpoint(&lightswitch);
 

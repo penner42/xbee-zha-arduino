@@ -238,14 +238,14 @@ void ZHA_Device::processGeneralFrame(XBeeAddress64 dst64, uint16_t dst16, uint16
         _payload[(3*((i-1)/2)) + 2] = STATUS_UNSUPPORTED_ATTRIBUTE;
       } else {
         /* Staples Connect won't recognize device without manufacturer name and model ID */
-//        if (attr->getAttrType() == ZHA_TYPE_CHARACTER_STRING) {
-//          copyHexL(&_payload[_payloadLength], attrId);
-//          _payload[_payloadLength + 2] = STATUS_SUCCESS;
-//          _payload[_payloadLength + 3] = ZHA_TYPE_CHARACTER_STRING;
-//          _payload[_payloadLength + 4] = 0x1;
-//          _payload[_payloadLength + 5] = 0x41;
-//          _payloadLength += 6;
-//        }
+        if (attr->getAttrType() == ZHA_TYPE_CHARACTER_STRING) {
+          copyHexL(&_payload[_payloadLength], attrId);
+          _payload[_payloadLength + 2] = STATUS_SUCCESS;
+          _payload[_payloadLength + 3] = ZHA_TYPE_CHARACTER_STRING;
+          _payload[_payloadLength + 4] = 0x1;
+          _payload[_payloadLength + 5] = 0x41;
+          _payloadLength += 6;
+        }
       }
     }
     ZBExplicitTxRequest attrresp(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), srcEndpoint, dstEndpoint, clusterId, profileId);
