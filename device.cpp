@@ -227,7 +227,7 @@ void ZHA_Device::processGeneralFrame(XBeeAddress64 dst64, uint16_t dst16, uint16
     _payloadLength = 3;
     _payload[0] = 0b00011000;
     _payload[1] = frameId;
-    _payload[2] = 0x1;
+    _payload[2] = ZCL_READ_ATTRIBUTES_RESPONSE;
     for (uint8_t i = 3; i < frameDataLength; i+=2) {
       uint16_t attrId = ((uint16_t)frameData[i+1] << 8) | frameData[i];
       Attribute *attr = cluster->getAttrById(attrId);
@@ -254,7 +254,7 @@ void ZHA_Device::processGeneralFrame(XBeeAddress64 dst64, uint16_t dst16, uint16
     _payloadLength = 4;
     _payload[0] = 0b00011000;
     _payload[1] = frameId;
-    _payload[2] = 0x0d;
+    _payload[2] = ZCL_DISCOVER_ATTRIBUTES_RESPONSE;
     uint16_t first_attr = ((uint16_t)frameData[4] << 8) | frameData[3];
     uint8_t max_attrs = frameData[5];
     uint8_t attr_index = cluster->getAttrIndexById(first_attr);
@@ -274,7 +274,39 @@ void ZHA_Device::processGeneralFrame(XBeeAddress64 dst64, uint16_t dst16, uint16
     _payload[3] = done;
     ZBExplicitTxRequest dar(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), srcEndpoint, dstEndpoint, clusterId, profileId);
     send(dar);
-  }
+  } else if (command == ZCL_CONFIGURE_REPORTING) {
+    _payloadLength = 3;
+    _payload[0] = 0b00011000;
+    _payload[1] = frameId;
+    _payload[2] = ZCL_CONFIGURE_REPORTING_RESPONSE;
+    uint8_t i = 3;
+    Serial.println(frameDataLength);
+    while (i < frameDataLength) {
+      if (frameData[i] == 0x00) {
+        /* send reports */
+        uint16_t attrId = ((uint16_t)frameData[i+2] << 8) | frameData[i+1];
+        Attribute *attr = cluster->getAttrById(attrId);
+        Serial.println("here1");
+        if (attr) {
+          Serial.println("here2");
+          uint8_t datatype = frameData[i+3];
+          uint16_t minimum_interval = ((uint16_t)frameData[i+5] << 8) | frameData[i+4];
+          uint16_t maximum_interval = ((uint16_t)frameData[i+7] << 8) | frameData[i+6];
+          uint16_t reportable_change = 0x0000;
+          uint16_t timeout_period = 0x0000;
+          attr->configureReporting(datatype, minimum_interval, maximum_interval, reportable_change, timeout_period);
+          i += 8;
+          _payload[_payloadLength++] = STATUS_SUCCESS;
+          _payload[_payloadLength++] = 0x00;
+          copyHexL(&_payload[_payloadLength++], attrId);
+        }
+      } else if (frameData[i] == 0x01) {
+        /* receive reports */
+      }
+    }
+    ZBExplicitTxRequest crr(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), srcEndpoint, dstEndpoint, clusterId, profileId);
+    send(crr);
+    }
 }
 
 void ZHA_Device::explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data) {
@@ -304,8 +336,33 @@ void ZHA_Device::explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data) {
   }
 }
 
+void ZHA_Device::reportAttributes() {
+  for (uint8_t eps = 0; eps < _endpoints.size(); eps++) {
+    ZHA_Endpoint *ep = _endpoints.get(eps);
+    for (uint8_t ics = 0; ics < ep->getNumInClusters(); ics++) {
+      ZHA_Cluster *ic = ep->getInCluster(ics);
+      for (uint8_t ats = 0; ats < ic->numAttributes(); ats++) {
+        Attribute *at = ic->getAttrByIndex(ats);
+        if (at->needsReporting()) {
+          _payload[0] = 0b00011000;
+          _payload[1] = 0;
+          _payload[2] = ZCL_REPORT_ATTRIBUTES;
+          copyHexL(&_payload[3], at->getAttrId());
+          _payload[5] = at->getAttrType();
+          _payload[6] = at->getValueBool();
+          _payloadLength = 7;
+          ZBExplicitTxRequest crr(_bcast64, _bcast16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), 0x8, 0x1, 0x0006, 0x0104);
+          send(crr);
+          at->markReported();
+        }
+      }
+    }
+  }
+}
+
 void ZHA_Device::loop() {
   XBeeWithCallbacks::loop();
+  reportAttributes();
 #ifdef ESP8266
   yield(); 
 #endif

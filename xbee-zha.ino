@@ -5,9 +5,10 @@
 #define DEBUG
 
 class arduinoLED : public OnOffCluster {
-  void on() { digitalWrite(13, HIGH); } 
-  void off() { digitalWrite(13, LOW); }
-  void toggle() { digitalWrite(13, digitalRead(13) ^ 1); }
+public:
+  void on() { OnOffCluster::on(); digitalWrite(13, HIGH); } 
+  void off() { OnOffCluster::off(); digitalWrite(13, LOW); }
+  void toggle() { OnOffCluster::toggle(); digitalWrite(13, digitalRead(13) ^ 1); }
 };
 
 BasicCluster basic_cluster;
@@ -43,7 +44,7 @@ void setup() {
 
 void loop() {
   if (debouncer.update() && debouncer.read() == LOW) {
-    digitalWrite(13, digitalRead(13) ^ 1);
+    led_cluster.toggle();
   }
   device.loop();
 }

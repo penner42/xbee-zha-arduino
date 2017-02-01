@@ -72,6 +72,8 @@ private:
   uint8_t _payload[MAX_FRAME_DATA_SIZE];
   uint8_t _payloadLength;
 
+  void reportAttributes();
+
   Stream *_devSerial;
 };
 
