@@ -194,7 +194,7 @@ void ZHA_Device::atCommandCb(AtCommandResponse &at, uintptr_t data) {
     /* set 16 bit address */
     XBeeDevice->_addr16 = ((uint16_t)value[0] << 8) | value[1];
     /* send announce */
-    XBeeDevice->sendAnnounce();
+    //XBeeDevice->sendAnnounce();
   }
 }
 
@@ -233,9 +233,9 @@ void ZHA_Device::processGeneralFrame(XBeeAddress64 dst64, uint16_t dst16, uint16
       Attribute *attr = cluster->getAttrById(attrId);
       if (attr == NULL) {
         /* attribute is undefined */
+        copyHexL(&_payload[_payloadLength], attrId);
+        _payload[_payloadLength + 2] = STATUS_UNSUPPORTED_ATTRIBUTE;
         _payloadLength += 3;
-        copyHexL(&_payload[3*((i-1)/2)], attrId);
-        _payload[(3*((i-1)/2)) + 2] = STATUS_UNSUPPORTED_ATTRIBUTE;
       } else {
         /* Staples Connect won't recognize device without manufacturer name and model ID */
         if (attr->getAttrType() == ZHA_TYPE_CHARACTER_STRING) {
@@ -266,10 +266,10 @@ void ZHA_Device::processGeneralFrame(XBeeAddress64 dst64, uint16_t dst16, uint16
         done = true;
         break;
       }
-      _payloadLength += 3;
       attr = cluster->getAttrByIndex(i + attr_index);
-      copyHexL(&_payload[4+(i*3)], attr->getAttrId());
-      _payload[6+(i*3)] = attr->getAttrType();
+      copyHexL(&_payload[_payloadLength], attr->getAttrId());
+      _payload[_payloadLength + 2] = attr->getAttrType();
+      _payloadLength += 3;
     }
     _payload[3] = done;
     ZBExplicitTxRequest dar(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), srcEndpoint, dstEndpoint, clusterId, profileId);

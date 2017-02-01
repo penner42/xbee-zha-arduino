@@ -9,6 +9,15 @@
 #define STATUS_FAILURE                            0x01
 #define STATUS_UNSUPPORTED_ATTRIBUTE              0x86
 
+/* ZDOs */
+#define ZDO_SIMPLE_DESCRIPTOR_REQUEST             0x0004
+#define ZDO_SIMPLE_DESCRIPTOR_RESPONSE            0x8004
+#define ZDO_ACTIVE_ENDPOINTS_REQUEST              0x0005
+#define ZDO_ACTIVE_ENDPOINTS_RESPONSE             0x8005
+#define ZDO_MATCH_DESCRIPTOR_REQUEST              0x0006
+#define ZDO_MATCH_DESCRIPTOR_RESPONSE             0x8006
+#define ZDO_DEVICE_ANNOUNCE                       0x0013
+
 /* General Command Frames */
 #define ZCL_READ_ATTRIBUTES                       0x00
 #define ZCL_READ_ATTRIBUTES_RESPONSE              0x01
