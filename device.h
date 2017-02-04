@@ -2,7 +2,8 @@
 #define _ZHA_DEVICE_H_
 
 #include "XBee.h"
-#include "endpoints.h"
+//#include "endpoints.h"
+#include "clusters.h"
 
 /* ZCL Status Fields */
 #define STATUS_SUCCESS                            0x00
@@ -39,21 +40,29 @@
 
 class ZHA_Device : public XBeeWithCallbacks { 
 public: 
-  ZHA_Device();
-  void addEndpoint(ZHA_Endpoint* endpoint);
+  ZHA_Device(uint8_t endpointId);
   void setSerial(Stream &serial);
   void initializeModem();
   
   void loop();
-  
+  void addInCluster(ZHA_Cluster *inCluster);
+  void addOutCluster(ZHA_Cluster *outCluster);
+  ZHA_Cluster* getInClusterById(uint16_t clusterId);
+  ZHA_Cluster* getOutClusterById(uint16_t clusterId);
+  uint8_t getEndpointId();
+  uint8_t getNumInClusters();
+  uint8_t getNumOutClusters();
+  ZHA_Cluster* getInCluster(uint8_t num);
+  ZHA_Cluster* getOutCluster(uint8_t num);    
+      
   static void atCommandCb(AtCommandResponse& at, uintptr_t data); 
   static void modemStatusCb(ModemStatusResponse& status, uintptr_t data);
   static void explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data);
    
-    
 private: 
-  LinkedList<ZHA_Endpoint*> _endpoints;
-  uint8_t _numEndpoints;
+  uint8_t _endpointId;
+  LinkedList<ZHA_Cluster*>_inClusters;
+  LinkedList<ZHA_Cluster*>_outClusters;
   
   XBeeAddress64 _addr64;
   uint16_t _addr16;
@@ -66,7 +75,7 @@ private:
   void processZDO(XBeeAddress64 remoteAddr64, uint16_t remoteAddr16, uint16_t clusterId, uint8_t *frameData, uint8_t frameDataLength);
 
   void processGeneralFrame(XBeeAddress64 remoteAddr64, uint16_t remoteAddr16, uint16_t clusterId, uint8_t dstEndpoint, uint8_t srcEndpoint, uint16_t profileId, uint8_t *frameData, uint8_t frameDataLength);
-  ZHA_Endpoint* getEndpointById(uint8_t endpointId);
+
 
   /* reusable data payload */
   uint8_t _payload[MAX_FRAME_DATA_SIZE];

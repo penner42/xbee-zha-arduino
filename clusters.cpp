@@ -6,10 +6,6 @@ uint16_t ZHA_Cluster::getClusterId() {
   return _clusterId;
 }
 
-//void ZHA_Cluster::sortAttributes() {
-//  _attrs.sort(Attribute::cmp);
-//}
-
 Attribute* ZHA_Cluster::getAttrById(uint16_t attrId) {
   for (int i = 0; i < _attrs.size(); i++) {
     Attribute *cur = _attrs.get(i);
@@ -74,16 +70,31 @@ void OnOffCluster::processCommand(uint8_t* frameData, uint8_t frameDataLength) {
   switch(frameData[2]) {
     case ON_OFF_CLUSTER_ON_COMMAND:
       getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)true);
-      on();
+      _on();
       break;
     case ON_OFF_CLUSTER_OFF_COMMAND:
       getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)false);
-      off();
+      _off();
       break;
     case ON_OFF_CLUSTER_TOGGLE_COMMAND:
       getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)(!(getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->getValueBool())));
-      toggle();
+      _toggle();
       break;
   }
+}
+
+void OnOffCluster::_on()     {
+  getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)true); 
+  on();
+}
+
+void OnOffCluster::_off()    { 
+  getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)false); 
+  off();
+}
+
+void OnOffCluster::_toggle() {
+  getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)(!(getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->getValueBool()))); 
+  toggle();
 }
 

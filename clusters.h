@@ -99,8 +99,13 @@ class OnOffCluster : public ZHA_Cluster {
 public:
   OnOffCluster();
   void processCommand(uint8_t *frameData, uint8_t frameDataLength);
-  virtual void on()     { getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)true); }
-  virtual void off()    { getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)false); }
-  virtual void toggle() { getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)(!(getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->getValueBool()))); }
+  virtual void on() = 0;
+  virtual void off() = 0;
+  virtual void toggle() = 0;
+
+//.private:
+  void _on();
+  void _off();
+  void _toggle();  
 };
 #endif

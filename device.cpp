@@ -63,18 +63,16 @@ void ZHA_Device::initializeModem() {
   Serial.println("setup done");
 }
 
-ZHA_Device::ZHA_Device() : _addr64(0), _bcast64(0) {
+ZHA_Device::ZHA_Device(uint8_t endpointId) : _addr64(0), _bcast64(0) {
   _addr16 = 0;
   _bcast16 = 0;
+
+  _endpointId = endpointId;
 
   onResponse(printResponseCb, (uintptr_t)(Print*)&Serial);
   onModemStatusResponse(modemStatusCb, (uintptr_t)this);
   onAtCommandResponse(atCommandCb, (uintptr_t)this);
   onPacketError(printErrorCb, (uintptr_t)(Print*)&Serial);
-}
-
-void ZHA_Device::addEndpoint(ZHA_Endpoint* endpoint) {
-  _endpoints.add(endpoint);
 }
 
 void ZHA_Device::setSerial(Stream &serial) {
@@ -99,44 +97,45 @@ void ZHA_Device::sendAnnounce() {
 void ZHA_Device::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t clusterId, uint8_t *frameData, uint8_t frameDataLength) {
   if (clusterId == 0x0004) {
     _addr16 = ((uint16_t)frameData[2] << 8) | frameData[1];
-    ZHA_Endpoint* ep = getEndpointById(frameData[3]);
-    if (ep) { 
-      uint8_t numInClusters = ep->getNumInClusters();
-      uint8_t numOutClusters = ep->getNumOutClusters();
+//    ZHA_Endpoint* ep = getEndpointById(frameData[3]);
+//    if (ep) { 
+      uint8_t numInClusters = getNumInClusters();
+      uint8_t numOutClusters = getNumOutClusters();
       _payloadLength = 12; //13 + (2 * (numInClusters + numOutClusters));
       _payload[0] = frameData[0];
       _payload[1] = STATUS_SUCCESS;
       copyHexL(&_payload[2], _addr16);
 //      _payload[4] = _payloadLength - 5;
-      _payload[5] = ep->getEndpointId();
+      _payload[5] = getEndpointId();
       copyHexL(&_payload[6], (uint16_t)0x0104);
-      copyHexL(&_payload[8], (uint16_t)0x0002);
+      copyHexL(&_payload[8], (uint16_t)0x0103);
       _payload[10] = 0x40; 
       _payload[11] = numInClusters;
       for (uint8_t i = 0; i < numInClusters; i++) {
-        copyHexL(&_payload[_payloadLength], ep->getInCluster(i)->getClusterId());
+        copyHexL(&_payload[_payloadLength], getInCluster(i)->getClusterId());
         _payloadLength += 2;
       }
       _payload[_payloadLength] = numOutClusters;
       _payloadLength++;
       for (uint8_t i = 0; i < numOutClusters; i++) {
-        copyHexL(&_payload[_payloadLength], ep->getOutCluster(i)->getClusterId());
+        copyHexL(&_payload[_payloadLength], getOutCluster(i)->getClusterId());
         _payloadLength += 2;
       }
       _payload[4] = _payloadLength - 5;
       ZBExplicitTxRequest SDR(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), 0, 0, (uint16_t)0x8004, 0);
       send(SDR);
-    }
+//    }
   } else if (clusterId == 0x0005) {
     _addr16 = ((uint16_t)frameData[2] << 8) | frameData[1];
     _payload[0] = frameData[0];
     _payload[1] = STATUS_SUCCESS;
     copyHexL(&_payload[2], _addr16);
-    _payload[4] = _endpoints.size();
-    for (uint8_t i = 0; i < _endpoints.size(); i++) {
-      _payload[i + 5] = _endpoints.get(i)->getEndpointId();
-    }
-    _payloadLength = 5 + _endpoints.size();
+    _payload[4] = 1; //_endpoints.size();
+//    for (uint8_t i = 0; i < _endpoints.size(); i++) {
+//      _payload[i + 5] = _endpoints.get(i)->getEndpointId();
+//    }
+    _payload[5] = _endpointId;
+    _payloadLength = 5 + 1;//_endpoints.size();
     ZBExplicitTxRequest endpoints(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), 0, 0, (uint16_t)0x8005, 0);
     send(endpoints);
   } else if (clusterId == 0x0006) {
@@ -161,14 +160,14 @@ void ZHA_Device::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t cluste
   }
 }
 
-ZHA_Endpoint* ZHA_Device::getEndpointById(uint8_t endpointId) {
-  for (uint8_t i = 0; i < _endpoints.size(); i++) {
-    if (_endpoints.get(i)->getEndpointId() == endpointId) {
-      return _endpoints.get(i);
-    }
-  }
-  return NULL;
-}
+//ZHA_Endpoint* ZHA_Device::getEndpointById(uint8_t endpointId) {
+//  for (uint8_t i = 0; i < _endpoints.size(); i++) {
+//    if (_endpoints.get(i)->getEndpointId() == endpointId) {
+//      return _endpoints.get(i);
+//    }
+//  }
+//  return NULL;
+//}
 
 
 void ZHA_Device::atCommandCb(AtCommandResponse &at, uintptr_t data) {
@@ -222,7 +221,8 @@ void ZHA_Device::modemStatusCb(ModemStatusResponse& status, uintptr_t data) {
 void ZHA_Device::processGeneralFrame(XBeeAddress64 dst64, uint16_t dst16, uint16_t clusterId, uint8_t dstEndpoint, uint8_t srcEndpoint, uint16_t profileId, uint8_t *frameData, uint8_t frameDataLength) {
   uint8_t frameId = frameData[1];
   uint8_t command = frameData[2];
-  ZHA_Cluster *cluster = getEndpointById(srcEndpoint)->getInClusterById(clusterId);
+//  ZHA_Cluster *cluster = getEndpointById(srcEndpoint)->getInClusterById(clusterId);
+  ZHA_Cluster *cluster = getInClusterById(clusterId);  
   if (command == ZCL_READ_ATTRIBUTES) {
     _payloadLength = 3;
     _payload[0] = 0b00011000;
@@ -330,17 +330,18 @@ void ZHA_Device::explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data) {
     } else if (frametype == 0b01) {
       /* cluster specific command frame */
       Serial.println("cluster specific command");
-      ZHA_Cluster *cluster = XBeeDevice->getEndpointById(dstEndpoint)->getInClusterById(clusterId);
+//      ZHA_Cluster *cluster = XBeeDevice->getEndpointById(dstEndpoint)->getInClusterById(clusterId);
+      ZHA_Cluster *cluster = XBeeDevice->getInClusterById(clusterId);
       cluster->processCommand(frameData, frameDataLength);
     }
   }
 }
 
 void ZHA_Device::reportAttributes() {
-  for (uint8_t eps = 0; eps < _endpoints.size(); eps++) {
-    ZHA_Endpoint *ep = _endpoints.get(eps);
-    for (uint8_t ics = 0; ics < ep->getNumInClusters(); ics++) {
-      ZHA_Cluster *ic = ep->getInCluster(ics);
+//  for (uint8_t eps = 0; eps < _endpoints.size(); eps++) {
+//    ZHA_Endpoint *ep = _endpoints.get(eps);
+    for (uint8_t ics = 0; ics < getNumInClusters(); ics++) {
+      ZHA_Cluster *ic = getInCluster(ics);
       for (uint8_t ats = 0; ats < ic->numAttributes(); ats++) {
         Attribute *at = ic->getAttrByIndex(ats);
         if (at->needsReporting()) {
@@ -357,7 +358,53 @@ void ZHA_Device::reportAttributes() {
         }
       }
     }
+//  }
+}
+
+void ZHA_Device::addInCluster(ZHA_Cluster *inCluster) {
+  _inClusters.add(inCluster);  
+}
+
+void ZHA_Device::addOutCluster(ZHA_Cluster *outCluster) {
+  _outClusters.add(outCluster);  
+}
+
+uint8_t ZHA_Device::getNumInClusters() {
+  return _inClusters.size();
+}
+
+uint8_t ZHA_Device::getNumOutClusters() {
+  return _outClusters.size();
+}
+
+ZHA_Cluster* ZHA_Device::getInCluster(uint8_t num) {
+  return _inClusters.get(num);
+}
+
+ZHA_Cluster* ZHA_Device::getOutCluster(uint8_t num) {
+  return _outClusters.get(num);
+}
+
+uint8_t ZHA_Device::getEndpointId() {
+  return _endpointId;
+}
+
+ZHA_Cluster* ZHA_Device::getInClusterById(uint16_t clusterId) {
+  for (uint8_t i = 0; i < _inClusters.size(); i++) {
+      if (_inClusters.get(i)->getClusterId() == clusterId) {
+        return _inClusters.get(i);
+      }
   }
+  return NULL;
+}
+
+ZHA_Cluster* ZHA_Device::getOutClusterById(uint16_t clusterId) {
+  for (uint8_t i = 0; i < _outClusters.size(); i++) {
+      if (_outClusters.get(i)->getClusterId() == clusterId) {
+        return _outClusters.get(i);
+      }
+  }
+  return NULL;
 }
 
 void ZHA_Device::loop() {
