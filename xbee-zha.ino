@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>
 #include <Bounce2.h>
-#include "device.h"
+#include "devicemanager.h"
 
 #define DEBUG
 
@@ -21,7 +21,7 @@ Bounce debouncer = Bounce();
 
 ZHA_Device lightswitch(0x08);
 SoftwareSerial nss(12,14);
-//ZHA_Device device;
+ZHA_DeviceManager devmanager;
 
 void setup() {
   Serial.begin(115200);
@@ -31,19 +31,20 @@ void setup() {
   lightswitch.addInCluster(&groups_cluster);
   lightswitch.addInCluster(&scenes_cluster);
   lightswitch.addInCluster(&led_cluster);
-
+  devmanager.addDevice(&lightswitch);
+  
   pinMode(13, OUTPUT);
   pinMode(16, INPUT);
   debouncer.attach(16);
   debouncer.interval(5);
   nss.begin(57600);
-  lightswitch.setSerial(nss);
-  lightswitch.initializeModem();
+  devmanager.setSerial(nss);
+  devmanager.initializeModem();
 }
 
 void loop() {
   if (debouncer.update() && debouncer.read() == LOW) {
     led_cluster._toggle();
   }
-  lightswitch.loop();
+  devmanager.loop();
 }

@@ -2,22 +2,13 @@
 #define _ZHA_DEVICE_H_
 
 #include "XBee.h"
-//#include "endpoints.h"
 #include "clusters.h"
+#include "Printers.h"
 
 /* ZCL Status Fields */
 #define STATUS_SUCCESS                            0x00
 #define STATUS_FAILURE                            0x01
 #define STATUS_UNSUPPORTED_ATTRIBUTE              0x86
-
-/* ZDOs */
-#define ZDO_SIMPLE_DESCRIPTOR_REQUEST             0x0004
-#define ZDO_SIMPLE_DESCRIPTOR_RESPONSE            0x8004
-#define ZDO_ACTIVE_ENDPOINTS_REQUEST              0x0005
-#define ZDO_ACTIVE_ENDPOINTS_RESPONSE             0x8005
-#define ZDO_MATCH_DESCRIPTOR_REQUEST              0x0006
-#define ZDO_MATCH_DESCRIPTOR_RESPONSE             0x8006
-#define ZDO_DEVICE_ANNOUNCE                       0x0013
 
 /* General Command Frames */
 #define ZCL_READ_ATTRIBUTES                       0x00
@@ -38,13 +29,13 @@
 #define ZCL_WRITE_ATTRIBUTES_STRUCTURED           0x0F
 #define ZCL_WRITE_ATTRIBUTES_STRUCTURED_RESPONSE  0x10
 
-class ZHA_Device : public XBeeWithCallbacks { 
+class ZHA_Device {
 public: 
   ZHA_Device(uint8_t endpointId);
-  void setSerial(Stream &serial);
-  void initializeModem();
-  
-  void loop();
+//  void setSerial(Stream &serial);
+//  void initializeModem();
+//  
+//  void loop();
   void addInCluster(ZHA_Cluster *inCluster);
   void addOutCluster(ZHA_Cluster *outCluster);
   ZHA_Cluster* getInClusterById(uint16_t clusterId);
@@ -55,35 +46,10 @@ public:
   ZHA_Cluster* getInCluster(uint8_t num);
   ZHA_Cluster* getOutCluster(uint8_t num);    
       
-  static void atCommandCb(AtCommandResponse& at, uintptr_t data); 
-  static void modemStatusCb(ModemStatusResponse& status, uintptr_t data);
-  static void explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data);
-   
 private: 
   uint8_t _endpointId;
   LinkedList<ZHA_Cluster*>_inClusters;
   LinkedList<ZHA_Cluster*>_outClusters;
-  
-  XBeeAddress64 _addr64;
-  uint16_t _addr16;
-  
-  XBeeAddress64 _bcast64;
-  uint16_t _bcast16;
-
-  void sendAnnounce();
-  void sendAT(String at);
-  void processZDO(XBeeAddress64 remoteAddr64, uint16_t remoteAddr16, uint16_t clusterId, uint8_t *frameData, uint8_t frameDataLength);
-
-  void processGeneralFrame(XBeeAddress64 remoteAddr64, uint16_t remoteAddr16, uint16_t clusterId, uint8_t dstEndpoint, uint8_t srcEndpoint, uint16_t profileId, uint8_t *frameData, uint8_t frameDataLength);
-
-
-  /* reusable data payload */
-  uint8_t _payload[MAX_FRAME_DATA_SIZE];
-  uint8_t _payloadLength;
-
-  void reportAttributes();
-
-  Stream *_devSerial;
 };
 
 #endif
