@@ -101,7 +101,7 @@ ZHA_Device* ZHA_DeviceManager::getDeviceByEndpoint(uint8_t endpointId) {
 }
 
 void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t clusterId, uint8_t *frameData, uint8_t frameDataLength) {
-  if (clusterId == 0x0004) {
+  if (clusterId == ZDO_SIMPLE_DESCRIPTOR_REQUEST) {
     _addr16 = ((uint16_t)frameData[2] << 8) | frameData[1];
     ZHA_Device* dev = getDeviceByEndpoint(frameData[3]);
     if (dev) { 
@@ -127,10 +127,10 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
         _payloadLength += 2;
       }
       _payload[4] = _payloadLength - 5;
-      ZBExplicitTxRequest SDR(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), 0, 0, (uint16_t)0x8004, 0);
+      ZBExplicitTxRequest SDR(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), 0, 0, ZDO_SIMPLE_DESCRIPTOR_RESPONSE, 0);
       send(SDR);
     }
-  } else if (clusterId == 0x0005) {
+  } else if (clusterId == ZDO_ACTIVE_ENDPOINTS_REQUEST) {
     _addr16 = ((uint16_t)frameData[2] << 8) | frameData[1];
     _payload[0] = frameData[0];
     _payload[1] = STATUS_SUCCESS;
@@ -140,9 +140,9 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
       _payload[i + 5] = _deviceList.get(i)->getEndpointId();
     }
     _payloadLength = 5 + _deviceList.size();
-    ZBExplicitTxRequest endpoints(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), 0, 0, (uint16_t)0x8005, 0);
+    ZBExplicitTxRequest endpoints(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), 0, 0, ZDO_ACTIVE_ENDPOINTS_RESPONSE, 0);
     send(endpoints);
-  } else if (clusterId == 0x0006) {
+  } else if (clusterId == ZDO_MATCH_DESCRIPTOR_REQUEST) {
     _addr16 = ((uint16_t)frameData[2] << 8) | frameData[1];
     uint16_t profile_id = ((uint16_t)frameData[4] << 8) | frameData[3];
     uint8_t numInClusters = frameData[5];
@@ -159,7 +159,7 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
     _payload[1] = STATUS_SUCCESS;
     copyHexL(&_payload[2], _addr16);
     _payload[4] = 0;
-    ZBExplicitTxRequest endpoints(dst64, dst16, 0, 0, (uint8_t*)&_payload, 5, getNextFrameId(), 0, 0, (uint16_t)0x8006, 0);
+    ZBExplicitTxRequest endpoints(dst64, dst16, 0, 0, (uint8_t*)&_payload, 5, getNextFrameId(), 0, 0, (uint16_t)ZDO_MATCH_DESCRIPTOR_RESPONSE, 0);
     send(endpoints);
   }
 }
