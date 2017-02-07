@@ -11,14 +11,14 @@ ZHA_DeviceManager::ZHA_DeviceManager() : _addr64(0), _bcast64(0) {
 }
 
 void ZHA_DeviceManager::sendAT(String at) {
-  if (at == "+++") { 
+  if (at == "+++") {
     _devSerial->print(at);
   } else {
     _devSerial->println(at);
   }
-  while (_devSerial->available() == 0) { 
+  while (_devSerial->available() == 0) {
 #ifdef ESP8266
-    yield(); 
+    yield();
 #endif
   }
   Serial.println(_devSerial->readString());
@@ -26,27 +26,27 @@ void ZHA_DeviceManager::sendAT(String at) {
 
 void ZHA_DeviceManager::initializeModem() {
   sendAT("+++");
-//  sendAT("ATEE0");
-//  sendAT("ATEO0");
+  //  sendAT("ATEE0");
+  //  sendAT("ATEO0");
   sendAT("ATNR0");
   sendAT("ATAP0");
-//  sendAT("ATAO0");
-//  sendAT("ATWR");
-//  sendAT("ATAC");
-//  sendAT("ATCN");
-//
-//  sendAT("+++");
-//  sendAT("ATBD3");
-//  sendAT("ATZS2");
+  //  sendAT("ATAO0");
+  //  sendAT("ATWR");
+  //  sendAT("ATAC");
+  //  sendAT("ATCN");
+  //
+  //  sendAT("+++");
+  //  sendAT("ATBD3");
+  //  sendAT("ATZS2");
   sendAT("ATAP2");
   sendAT("ATSH");
-//  sendAT("ATAO3");
-//  sendAT("ATEE1");
-//  sendAT("ATEO2");
-//  sendAT("ATKY5A6967426565416C6C69616E63653039");
+  //  sendAT("ATAO3");
+  //  sendAT("ATEE1");
+  //  sendAT("ATEO2");
+  //  sendAT("ATKY5A6967426565416C6C69616E63653039");
   sendAT("ATWR");
   sendAT("ATAC");
-//  sendAT("ATCN");
+  //  sendAT("ATCN");
   Serial.println("setup done");
 }
 
@@ -82,7 +82,7 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
   if (clusterId == ZDO_SIMPLE_DESCRIPTOR_REQUEST) {
     _addr16 = ((uint16_t)frameData[2] << 8) | frameData[1];
     ZHA_Device* dev = getDeviceByEndpoint(frameData[3]);
-    if (dev) { 
+    if (dev) {
       uint8_t numInClusters = dev->getNumInClusters();
       uint8_t numOutClusters = dev->getNumOutClusters();
       _payloadLength = 12; //13 + (2 * (numInClusters + numOutClusters));
@@ -91,8 +91,8 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
       copyHexL(&_payload[2], _addr16);
       _payload[5] = dev->getEndpointId();
       copyHexL(&_payload[6], (uint16_t)0x0104);
-      copyHexL(&_payload[8], (uint16_t)0x0103);
-      _payload[10] = 0x40; 
+      copyHexL(&_payload[8], (uint16_t)0x0002);
+      _payload[10] = 0x40;
       _payload[11] = numInClusters;
       for (uint8_t i = 0; i < numInClusters; i++) {
         copyHexL(&_payload[_payloadLength], dev->getInCluster(i)->getClusterId());
@@ -125,12 +125,12 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
     uint16_t profile_id = ((uint16_t)frameData[4] << 8) | frameData[3];
     uint8_t numInClusters = frameData[5];
     for (uint8_t i = 1; i <= numInClusters; i++) {
-      uint16_t cluster = ((uint16_t)frameData[5+2*i] << 8) | frameData[4+(2*i)];
+      uint16_t cluster = ((uint16_t)frameData[5 + 2 * i] << 8) | frameData[4 + (2 * i)];
       Serial.println(cluster, HEX);
     }
-    uint8_t numOutClusters = frameData[6+2*numInClusters];
+    uint8_t numOutClusters = frameData[6 + 2 * numInClusters];
     for (uint8_t i = 1; i <= numOutClusters; i++) {
-      uint16_t cluster = ((uint16_t)frameData[7+2*(i+numInClusters)] << 8) | frameData[6+2*(i+numInClusters)];
+      uint16_t cluster = ((uint16_t)frameData[7 + 2 * (i + numInClusters)] << 8) | frameData[6 + 2 * (i + numInClusters)];
       Serial.println(cluster, HEX);
     }
     _payload[0] = frameData[0];
@@ -148,19 +148,18 @@ void ZHA_DeviceManager::atCommandCb(AtCommandResponse &at, uintptr_t data) {
   uint8_t *cmd = at.getCommand();
   uint8_t *value = at.getValue();
   AtCommandRequest req;
-  Serial.println("asdf");
   if (strncmp((char*)cmd, "SH", 2) == 0) {
     /* set high 32 bits of 64 bit address */
     XBeeDevice->_addr64.setMsb( ((uint32_t)value[0]) << 24 | ((uint32_t)value[1]) << 16 | ((uint32_t)value[2]) << 8 | (uint32_t)value[3]);
     req.setCommand((uint8_t*)"SL");
     req.setFrameId(XBeeDevice->getNextFrameId());
-    XBeeDevice->send(req);    
+    XBeeDevice->send(req);
   } else if (strncmp((char*)cmd, "SL", 2) == 0) {
     /* set low 32 bits of 64 bit address */
     XBeeDevice->_addr64.setLsb( ((uint32_t)value[0]) << 24 | ((uint32_t)value[1]) << 16 | ((uint32_t)value[2]) << 8 | (uint32_t)value[3]);
     req.setCommand((uint8_t*)"MY");
     req.setFrameId(XBeeDevice->getNextFrameId());
-    XBeeDevice->send(req);    
+    XBeeDevice->send(req);
   } else if (strncmp((char*)cmd, "MY", 2) == 0) {
     /* set 16 bit address */
     XBeeDevice->_addr16 = ((uint16_t)value[0] << 8) | value[1];
@@ -172,12 +171,12 @@ void ZHA_DeviceManager::atCommandCb(AtCommandResponse &at, uintptr_t data) {
 void ZHA_DeviceManager::modemStatusCb(ModemStatusResponse& status, uintptr_t data) {
   ZHA_DeviceManager *XBeeDevice = (ZHA_DeviceManager*)data;
   AtCommandRequest req;
-    
-  switch(status.getStatus()) {
+
+  switch (status.getStatus()) {
     case HARDWARE_RESET:
       Serial.println("Modem reset.");
       break;
-    case ASSOCIATED: 
+    case ASSOCIATED:
       Serial.println("Joined network.");
       /* Get 16 bit address */
       req.setCommand((uint8_t*)"SH");
@@ -195,15 +194,14 @@ void ZHA_DeviceManager::explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data)
   uint16_t profileId      = resp.getProfileId();
   uint16_t clusterId      = resp.getClusterId();
   uint8_t  srcEndpoint    = resp.getSrcEndpoint();
-  uint8_t  dstEndpoint    = resp.getDstEndpoint();  
+  uint8_t  dstEndpoint    = resp.getDstEndpoint();
   uint8_t *frameData      = resp.getFrameData() + resp.getDataOffset();
   uint8_t frameDataLength = resp.getFrameDataLength() - resp.getDataOffset();
 
   if (profileId == 0x0000 && srcEndpoint == 0x00 && dstEndpoint == 0x00) {
     /* ZDO command */
     XBeeDevice->processZDO(resp.getRemoteAddress64(), resp.getRemoteAddress16(), clusterId, frameData, frameDataLength);
-  } else if (profileId == 0x0104) {
-    uint8_t frametype = frameData[0] & 0b11;
+  } else if (profileId == ZHA_PROFILE_ID) {
     ZHA_Device *dev = XBeeDevice->getDeviceByEndpoint(dstEndpoint);
     if (dev) {
       bool result = dev->processCommand(frameData, frameDataLength, clusterId, (uint8_t*)&XBeeDevice->_payload, XBeeDevice->_payloadLength);
@@ -211,7 +209,7 @@ void ZHA_DeviceManager::explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data)
         ZBExplicitTxRequest response(resp.getRemoteAddress64(), resp.getRemoteAddress16(), 0, 0, (uint8_t*)&XBeeDevice->_payload, XBeeDevice->_payloadLength, XBeeDevice->getNextFrameId(), dstEndpoint, srcEndpoint, clusterId, profileId);
         XBeeDevice->send(response);
       }
-     }
+    }
   }
 }
 
@@ -247,7 +245,7 @@ void ZHA_DeviceManager::loop() {
   XBeeWithCallbacks::loop();
   reportAttributes();
 #ifdef ESP8266
-  yield(); 
+  yield();
 #endif
 }
 

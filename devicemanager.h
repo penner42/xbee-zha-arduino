@@ -4,6 +4,8 @@
 #include "device.h"
 #include "utils.h"
 
+#define ZHA_PROFILE_ID 0x0104
+
 /* ZDOs */
 #define ZDO_SIMPLE_DESCRIPTOR_REQUEST             0x0004
 #define ZDO_SIMPLE_DESCRIPTOR_RESPONSE            0x8004
