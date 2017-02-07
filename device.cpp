@@ -98,7 +98,7 @@ bool ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLeng
     payload[2] = ZCL_READ_ATTRIBUTES_RESPONSE;
     for (uint8_t i = 3; i < frameDataLength; i += 2) {
       uint16_t attrId = ((uint16_t)frameData[i + 1] << 8) | frameData[i];
-      Attribute *attr = cluster->getAttrById(attrId);
+      ZHA_Attribute *attr = cluster->getAttrById(attrId);
       if (attr == NULL) {
         /* attribute is undefined */
         copyHexL(&payload[payloadLength], attrId);
@@ -127,7 +127,7 @@ bool ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLeng
     uint8_t attr_index = cluster->getAttrIndexById(first_attr);
     uint8_t num_attrs = cluster->numAttributes();
     bool done = false;
-    Attribute *attr;
+    ZHA_Attribute *attr;
     for (uint8_t i = 0; i < max_attrs; i++) {
       if (i + attr_index + 1 > num_attrs) {
         done = true;
@@ -151,7 +151,7 @@ bool ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLeng
       if (frameData[i] == 0x00) {
         /* send reports */
         uint16_t attrId = ((uint16_t)frameData[i + 2] << 8) | frameData[i + 1];
-        Attribute *attr = cluster->getAttrById(attrId);
+        ZHA_Attribute *attr = cluster->getAttrById(attrId);
         Serial.println("here1");
         if (attr) {
           Serial.println("here2");

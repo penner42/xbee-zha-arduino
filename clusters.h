@@ -50,14 +50,14 @@ public:
 	ZHA_Cluster();
 	
 	uint16_t getClusterId();
-	Attribute* getAttrById(uint16_t attrId);
+	ZHA_Attribute* getAttrById(uint16_t attrId);
   int getAttrIndexById(uint16_t attrId);
-  Attribute* getAttrByIndex(int index);
+  ZHA_Attribute* getAttrByIndex(int index);
   uint8_t numAttributes() { return _attrs.size(); } 
   virtual bool processCommand(uint8_t *frameData, uint8_t frameDataLength) = 0;
       
 protected: 
-  LinkedList<Attribute*> _attrs;
+  LinkedList<ZHA_Attribute*> _attrs;
 	uint16_t _clusterId;
 
 };

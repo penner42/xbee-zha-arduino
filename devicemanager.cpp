@@ -219,7 +219,7 @@ void ZHA_DeviceManager::reportAttributes() {
     for (uint8_t ics = 0; ics < dev->getNumInClusters(); ics++) {
       ZHA_Cluster *ic = dev->getInCluster(ics);
       for (uint8_t ats = 0; ats < ic->numAttributes(); ats++) {
-        Attribute *at = ic->getAttrByIndex(ats);
+        ZHA_Attribute *at = ic->getAttrByIndex(ats);
         if (at->needsReporting()) {
           _payload[0] = 0b00011000;
           _payload[1] = 0;
