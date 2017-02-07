@@ -105,15 +105,11 @@ bool ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLeng
         payload[payloadLength + 2] = STATUS_UNSUPPORTED_ATTRIBUTE;
         payloadLength += 3;
       } else {
-        /* Staples Connect won't recognize device without manufacturer name and model ID */
-        if (attr->getAttrType() == ZHA_TYPE_CHARACTER_STRING) {
-          copyHexL(&payload[payloadLength], attrId);
-          payload[payloadLength + 2] = STATUS_SUCCESS;
-          payload[payloadLength + 3] = ZHA_TYPE_CHARACTER_STRING;
-          payload[payloadLength + 4] = 0x1;
-          payload[payloadLength + 5] = 0x41;
-          payloadLength += 6;
-        }
+        copyHexL(&payload[payloadLength], attrId);
+        payload[payloadLength + 2] = STATUS_SUCCESS;
+        payload[payloadLength + 3] = attr->getAttrType();
+        payloadLength +=4;
+        payloadLength += attr->copyPayload((uint8_t*)&payload[payloadLength]);
       }
     }
     return true;
@@ -152,9 +148,7 @@ bool ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLeng
         /* send reports */
         uint16_t attrId = ((uint16_t)frameData[i + 2] << 8) | frameData[i + 1];
         ZHA_Attribute *attr = cluster->getAttrById(attrId);
-        Serial.println("here1");
         if (attr) {
-          Serial.println("here2");
           uint8_t datatype = frameData[i + 3];
           uint16_t minimum_interval = ((uint16_t)frameData[i + 5] << 8) | frameData[i + 4];
           uint16_t maximum_interval = ((uint16_t)frameData[i + 7] << 8) | frameData[i + 6];

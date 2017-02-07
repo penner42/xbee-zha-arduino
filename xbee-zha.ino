@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 #include <Bounce2.h>
 #include "devicemanager.h"
+#include <ESP8266WiFi.h>
 
 #define DEBUG
 
@@ -15,6 +16,8 @@ BasicCluster basic_cluster;
 IdentifyCluster identify_cluster;
 GroupsCluster groups_cluster;
 ScenesCluster scenes_cluster;
+LevelControlCluster level_cluster;
+ZLLCluster zll_cluster;
 arduinoLED led_cluster;
 
 Bounce debouncer = Bounce();
@@ -24,6 +27,7 @@ SoftwareSerial nss(12,14);
 ZHA_DeviceManager devmanager;
 
 void setup() {
+  WiFi.mode(WIFI_OFF);
   Serial.begin(115200);
 
   lightswitch.addInCluster(&basic_cluster);
@@ -31,6 +35,8 @@ void setup() {
   lightswitch.addInCluster(&groups_cluster);
   lightswitch.addInCluster(&scenes_cluster);
   lightswitch.addInCluster(&led_cluster);
+  lightswitch.addInCluster(&level_cluster);
+  lightswitch.addInCluster(&zll_cluster);
   devmanager.addDevice(&lightswitch);
   
   pinMode(13, OUTPUT);

@@ -107,4 +107,21 @@ public:
   void _off();
   void _toggle();  
 };
+
+class LevelControlCluster : public ZHA_Cluster {
+public:
+  LevelControlCluster();
+
+private:
+  bool processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
+};
+
+class ZLLCluster : public ZHA_Cluster {
+public:
+  ZLLCluster();
+
+private:
+  bool processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
+};
+
 #endif
