@@ -4,6 +4,7 @@
 #include "XBee.h"
 #include "clusters.h"
 #include "Printers.h"
+#include "utils.h"
 
 /* ZCL Status Fields */
 #define STATUS_SUCCESS                            0x00
@@ -45,7 +46,10 @@ public:
   uint8_t getNumOutClusters();
   ZHA_Cluster* getInCluster(uint8_t num);
   ZHA_Cluster* getOutCluster(uint8_t num);    
-      
+  
+  bool processCommand(uint8_t *frameData, uint8_t frameDataLength, uint16_t clusterId, uint8_t *payload, uint8_t& _payload);    
+  bool processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, uint16_t clusterId, uint8_t *payload, uint8_t& _payload);    
+
 private: 
   uint8_t _endpointId;
   LinkedList<ZHA_Cluster*>_inClusters;

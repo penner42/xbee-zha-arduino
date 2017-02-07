@@ -66,7 +66,7 @@ OnOffCluster::OnOffCluster() {
   _clusterId = ON_OFF_CLUSTER_ID;
 }
 
-void OnOffCluster::processCommand(uint8_t* frameData, uint8_t frameDataLength) {
+bool OnOffCluster::processCommand(uint8_t* frameData, uint8_t frameDataLength) {
   switch(frameData[2]) {
     case ON_OFF_CLUSTER_ON_COMMAND:
       getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)true);
@@ -81,6 +81,7 @@ void OnOffCluster::processCommand(uint8_t* frameData, uint8_t frameDataLength) {
       _toggle();
       break;
   }
+  return false;
 }
 
 void OnOffCluster::_on()     {

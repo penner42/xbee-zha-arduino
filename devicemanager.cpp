@@ -1,27 +1,5 @@
 #include "devicemanager.h"
 
-void copyHex(uint8_t *d, uint16_t v) {
-  d[1] = (uint8_t)v;
-  d[0] = (uint8_t)(v >> 8);
-}
-
-void copyHex(uint8_t *d, uint32_t v) {
-  copyHex(d, (uint16_t)(v >> 16));
-  copyHex(d+2, (uint16_t)v);
-}
-
-void copyHexL(uint8_t *d, uint16_t v) {
-  /* little endian */
-  d[0] = (uint8_t)v;
-  d[1] = (uint8_t)(v >> 8);
-}
-
-void copyHexL(uint8_t *d, uint32_t v) {
-  /* little endian */
-  copyHexL(d, (uint16_t)(v));
-  copyHexL(d+2, (uint16_t)(v >> 16));
-}
-
 ZHA_DeviceManager::ZHA_DeviceManager() : _addr64(0), _bcast64(0) {
   _addr16 = 0;
   _bcast16 = 0;
@@ -212,97 +190,6 @@ void ZHA_DeviceManager::modemStatusCb(ModemStatusResponse& status, uintptr_t dat
   }
 }
 
-void ZHA_DeviceManager::processGeneralFrame(XBeeAddress64 dst64, uint16_t dst16, uint16_t clusterId, uint8_t dstEndpoint, uint8_t srcEndpoint, uint16_t profileId, uint8_t *frameData, uint8_t frameDataLength) {
-  uint8_t frameId = frameData[1];
-  uint8_t command = frameData[2];
-  ZHA_Cluster *cluster = getDeviceByEndpoint(srcEndpoint)->getInClusterById(clusterId);
-//  ZHA_Cluster *cluster = getInClusterById(clusterId);  
-  if (command == ZCL_READ_ATTRIBUTES) {
-    _payloadLength = 3;
-    _payload[0] = 0b00011000;
-    _payload[1] = frameId;
-    _payload[2] = ZCL_READ_ATTRIBUTES_RESPONSE;
-    for (uint8_t i = 3; i < frameDataLength; i+=2) {
-      uint16_t attrId = ((uint16_t)frameData[i+1] << 8) | frameData[i];
-      Attribute *attr = cluster->getAttrById(attrId);
-      if (attr == NULL) {
-        /* attribute is undefined */
-        copyHexL(&_payload[_payloadLength], attrId);
-        _payload[_payloadLength + 2] = STATUS_UNSUPPORTED_ATTRIBUTE;
-        _payloadLength += 3;
-      } else {
-        /* Staples Connect won't recognize device without manufacturer name and model ID */
-        if (attr->getAttrType() == ZHA_TYPE_CHARACTER_STRING) {
-          copyHexL(&_payload[_payloadLength], attrId);
-          _payload[_payloadLength + 2] = STATUS_SUCCESS;
-          _payload[_payloadLength + 3] = ZHA_TYPE_CHARACTER_STRING;
-          _payload[_payloadLength + 4] = 0x1;
-          _payload[_payloadLength + 5] = 0x41;
-          _payloadLength += 6;
-        }
-      }
-    }
-    ZBExplicitTxRequest attrresp(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), srcEndpoint, dstEndpoint, clusterId, profileId);
-    send(attrresp);
-  } else if (command == ZCL_DISCOVER_ATTRIBUTES) {
-    _payloadLength = 4;
-    _payload[0] = 0b00011000;
-    _payload[1] = frameId;
-    _payload[2] = ZCL_DISCOVER_ATTRIBUTES_RESPONSE;
-    uint16_t first_attr = ((uint16_t)frameData[4] << 8) | frameData[3];
-    uint8_t max_attrs = frameData[5];
-    uint8_t attr_index = cluster->getAttrIndexById(first_attr);
-    uint8_t num_attrs = cluster->numAttributes();
-    bool done = false;
-    Attribute *attr;
-    for (uint8_t i = 0; i < max_attrs; i++) {
-      if (i + attr_index + 1 > num_attrs) {
-        done = true;
-        break;
-      }
-      attr = cluster->getAttrByIndex(i + attr_index);
-      copyHexL(&_payload[_payloadLength], attr->getAttrId());
-      _payload[_payloadLength + 2] = attr->getAttrType();
-      _payloadLength += 3;
-    }
-    _payload[3] = done;
-    ZBExplicitTxRequest dar(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), srcEndpoint, dstEndpoint, clusterId, profileId);
-    send(dar);
-  } else if (command == ZCL_CONFIGURE_REPORTING) {
-    _payloadLength = 3;
-    _payload[0] = 0b00011000;
-    _payload[1] = frameId;
-    _payload[2] = ZCL_CONFIGURE_REPORTING_RESPONSE;
-    uint8_t i = 3;
-    Serial.println(frameDataLength);
-    while (i < frameDataLength) {
-      if (frameData[i] == 0x00) {
-        /* send reports */
-        uint16_t attrId = ((uint16_t)frameData[i+2] << 8) | frameData[i+1];
-        Attribute *attr = cluster->getAttrById(attrId);
-        Serial.println("here1");
-        if (attr) {
-          Serial.println("here2");
-          uint8_t datatype = frameData[i+3];
-          uint16_t minimum_interval = ((uint16_t)frameData[i+5] << 8) | frameData[i+4];
-          uint16_t maximum_interval = ((uint16_t)frameData[i+7] << 8) | frameData[i+6];
-          uint16_t reportable_change = 0x0000;
-          uint16_t timeout_period = 0x0000;
-          attr->configureReporting(datatype, minimum_interval, maximum_interval, reportable_change, timeout_period);
-          i += 8;
-          _payload[_payloadLength++] = STATUS_SUCCESS;
-          _payload[_payloadLength++] = 0x00;
-          copyHexL(&_payload[_payloadLength++], attrId);
-        }
-      } else if (frameData[i] == 0x01) {
-        /* receive reports */
-      }
-    }
-    ZBExplicitTxRequest crr(dst64, dst16, 0, 0, (uint8_t*)&_payload, _payloadLength, getNextFrameId(), srcEndpoint, dstEndpoint, clusterId, profileId);
-    send(crr);
-    }
-}
-
 void ZHA_DeviceManager::explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data) {
   ZHA_DeviceManager *XBeeDevice = (ZHA_DeviceManager*)data;
   uint16_t profileId      = resp.getProfileId();
@@ -317,17 +204,14 @@ void ZHA_DeviceManager::explicitRxCb(ZBExplicitRxResponse &resp, uintptr_t data)
     XBeeDevice->processZDO(resp.getRemoteAddress64(), resp.getRemoteAddress16(), clusterId, frameData, frameDataLength);
   } else if (profileId == 0x0104) {
     uint8_t frametype = frameData[0] & 0b11;
-    if (frametype == 0b00) {
-      /* general command frame */ 
-      Serial.println("general command");
-      XBeeDevice->processGeneralFrame(resp.getRemoteAddress64(), resp.getRemoteAddress16(), clusterId, srcEndpoint, dstEndpoint, profileId, frameData, frameDataLength);
-    } else if (frametype == 0b01) {
-      /* cluster specific command frame */
-      Serial.println("cluster specific command");
-      ZHA_Cluster *cluster = XBeeDevice->getDeviceByEndpoint(dstEndpoint)->getInClusterById(clusterId);
-//      ZHA_Cluster *cluster = XBeeDevice->getInClusterById(clusterId);
-      cluster->processCommand(frameData, frameDataLength);
-    }
+    ZHA_Device *dev = XBeeDevice->getDeviceByEndpoint(dstEndpoint);
+    if (dev) {
+      bool result = dev->processCommand(frameData, frameDataLength, clusterId, (uint8_t*)&XBeeDevice->_payload, XBeeDevice->_payloadLength);
+      if (result) {
+        ZBExplicitTxRequest response(resp.getRemoteAddress64(), resp.getRemoteAddress16(), 0, 0, (uint8_t*)&XBeeDevice->_payload, XBeeDevice->_payloadLength, XBeeDevice->getNextFrameId(), dstEndpoint, srcEndpoint, clusterId, profileId);
+        XBeeDevice->send(response);
+      }
+     }
   }
 }
 

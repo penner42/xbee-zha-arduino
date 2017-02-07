@@ -54,8 +54,7 @@ public:
   int getAttrIndexById(uint16_t attrId);
   Attribute* getAttrByIndex(int index);
   uint8_t numAttributes() { return _attrs.size(); } 
-  virtual void processCommand(uint8_t *frameData, uint8_t frameDataLength) = 0;
-  //void sortAttributes();
+  virtual bool processCommand(uint8_t *frameData, uint8_t frameDataLength) = 0;
       
 protected: 
   LinkedList<Attribute*> _attrs;
@@ -68,7 +67,7 @@ public:
 	BasicCluster();
   
 private:
-  void processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
+  bool processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
 };
 
 class IdentifyCluster : public ZHA_Cluster {
@@ -76,7 +75,7 @@ public:
   IdentifyCluster();
 
 private:
-  void processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
+  bool processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
 };
 
 class GroupsCluster : public ZHA_Cluster {
@@ -84,7 +83,7 @@ public:
   GroupsCluster();
 
 private:
-  void processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
+  bool processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
 };
 
 class ScenesCluster : public ZHA_Cluster {
@@ -92,13 +91,13 @@ public:
   ScenesCluster();
 
 private:
-  void processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
+  bool processCommand(uint8_t *frameData, uint8_t frameDataLength) { };
 };
 
 class OnOffCluster : public ZHA_Cluster {
 public:
   OnOffCluster();
-  void processCommand(uint8_t *frameData, uint8_t frameDataLength);
+  bool processCommand(uint8_t *frameData, uint8_t frameDataLength);
   virtual void on() = 0;
   virtual void off() = 0;
   virtual void toggle() = 0;

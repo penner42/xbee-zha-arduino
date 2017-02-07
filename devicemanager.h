@@ -2,6 +2,7 @@
 #define _ZHA_DEVICEMANAGER_H_
 
 #include "device.h"
+#include "utils.h"
 
 /* ZDOs */
 #define ZDO_SIMPLE_DESCRIPTOR_REQUEST             0x0004
