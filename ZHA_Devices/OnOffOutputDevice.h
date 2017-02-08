@@ -27,6 +27,7 @@ private:
 };
 
 OnOffOutputDevice::OnOffOutputDevice(uint8_t endpointId) : ZHA_Device(endpointId) {
+    _deviceId = ZHA_ON_OFF_OUTPUT_DEVICE_ID;
     addInCluster(&basic_cluster);
     addInCluster(&identify_cluster);
     addInCluster(&onoff_cluster);

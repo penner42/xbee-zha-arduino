@@ -6,6 +6,9 @@
 #include "Printers.h"
 #include "ZHA_Utils.h"
 
+#define ZHA_ON_OFF_OUTPUT_DEVICE_ID              0x0002
+#define ZHA_LEVEL_CONTROLLABLE_OUTPUT_DEVICE_ID  0x0003
+
 /* ZCL Status Fields */
 #define STATUS_SUCCESS                            0x00
 #define STATUS_FAILURE                            0x01
@@ -32,29 +35,32 @@
 
 class ZHA_Device {
 public:
-//  ZHA_Device() { };
-  ZHA_Device(uint8_t endpointId);
-//  void setSerial(Stream &serial);
-//  void initializeModem();
-//  
-//  void loop();
-  void addInCluster(ZHA_Cluster *inCluster);
-  void addOutCluster(ZHA_Cluster *outCluster);
-  ZHA_Cluster* getInClusterById(uint16_t clusterId);
-  ZHA_Cluster* getOutClusterById(uint16_t clusterId);
-  uint8_t getEndpointId();
-  uint8_t getNumInClusters();
-  uint8_t getNumOutClusters();
-  ZHA_Cluster* getInCluster(uint8_t num);
-  ZHA_Cluster* getOutCluster(uint8_t num);    
-  
-  bool processCommand(uint8_t *frameData, uint8_t frameDataLength, uint16_t clusterId, uint8_t *payload, uint8_t& _payload);    
-  bool processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, uint16_t clusterId, uint8_t *payload, uint8_t& _payload);    
+    ZHA_Device(uint8_t endpointId);
+    void addInCluster(ZHA_Cluster *inCluster);
+    void addOutCluster(ZHA_Cluster *outCluster);
+    ZHA_Cluster *getInClusterById(uint16_t clusterId);
+    ZHA_Cluster *getOutClusterById(uint16_t clusterId);
+
+    uint16_t getDeviceId();
+    uint8_t getEndpointId();
+    uint8_t getNumInClusters();
+    uint8_t getNumOutClusters();
+
+    ZHA_Cluster *getInCluster(uint8_t num);
+    ZHA_Cluster *getOutCluster(uint8_t num);
+
+    bool processCommand(uint8_t *frameData, uint8_t frameDataLength, uint16_t clusterId, uint8_t *payload,
+                        uint8_t &_payload);
+    bool processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, uint16_t clusterId, uint8_t *payload,
+                               uint8_t &_payload);
+
+protected:
+    uint16_t _deviceId;
 
 private:
-  uint8_t _endpointId;
-  LinkedList<ZHA_Cluster*>_inClusters;
-  LinkedList<ZHA_Cluster*>_outClusters;
+    uint8_t _endpointId;
+    LinkedList<ZHA_Cluster *> _inClusters;
+    LinkedList<ZHA_Cluster *> _outClusters;
 };
 
 #endif

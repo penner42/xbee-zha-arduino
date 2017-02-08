@@ -32,6 +32,10 @@ uint8_t ZHA_Device::getEndpointId() {
     return _endpointId;
 }
 
+uint16_t ZHA_Device::getDeviceId() {
+    return _deviceId;
+}
+
 ZHA_Cluster *ZHA_Device::getInClusterById(uint16_t clusterId) {
     for (uint8_t i = 0; i < _inClusters.size(); i++) {
         if (_inClusters.get(i)->getClusterId() == clusterId) {
