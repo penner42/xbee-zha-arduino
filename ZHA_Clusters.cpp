@@ -1,4 +1,4 @@
-#include "clusters.h"
+#include "ZHA_Clusters.h"
 
 ZHA_Cluster::ZHA_Cluster() {}
 
@@ -35,8 +35,8 @@ BasicCluster::BasicCluster() {
   /* mandatory attributes, default values */
   _attrs.add(new ZHA_Attribute(BASIC_CLUSTER_ATTRIBUTE_ZCL_VERSION, ZHA_TYPE_UINT8, 0x1));
   _attrs.add(new ZHA_Attribute(BASIC_CLUSTER_ATTRIBUTE_POWER_SOURCE, ZHA_TYPE_8BIT_ENUMERATION, 0x0));
-  _attrs.add(new ZHA_Attribute(BASIC_CLUSTER_ATTRIBUTE_MANUFACTURER_NAME, ZHA_TYPE_CHARACTER_STRING, String("GE_Appliances")));
-  _attrs.add(new ZHA_Attribute(BASIC_CLUSTER_ATTRIBUTE_MODEL_IDENTIFIER, ZHA_TYPE_CHARACTER_STRING, String("ZLL Light")));
+//  _attrs.add(new ZHA_Attribute(BASIC_CLUSTER_ATTRIBUTE_MANUFACTURER_NAME, ZHA_TYPE_CHARACTER_STRING, String("GE_Appliances")));
+//  _attrs.add(new ZHA_Attribute(BASIC_CLUSTER_ATTRIBUTE_MODEL_IDENTIFIER, ZHA_TYPE_CHARACTER_STRING, String("ZLL Light")));
 
   _clusterId = BASIC_CLUSTER_ID;
 }

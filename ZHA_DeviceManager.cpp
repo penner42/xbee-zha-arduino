@@ -1,4 +1,4 @@
-#include "devicemanager.h"
+#include "ZHA_DeviceManager.h"
 
 ZHA_DeviceManager::ZHA_DeviceManager() : _addr64(0), _bcast64(0) {
   _addr16 = 0;

@@ -1,4 +1,4 @@
-#include "device.h"
+#include "ZHA_Devices.h"
 
 ZHA_Device::ZHA_Device(uint8_t endpointId) {
   _endpointId = endpointId;

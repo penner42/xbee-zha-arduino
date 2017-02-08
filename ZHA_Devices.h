@@ -2,9 +2,9 @@
 #define _ZHA_DEVICE_H_
 
 #include "XBee.h"
-#include "clusters.h"
+#include "ZHA_Clusters.h"
 #include "Printers.h"
-#include "utils.h"
+#include "ZHA_Utils.h"
 
 /* ZCL Status Fields */
 #define STATUS_SUCCESS                            0x00

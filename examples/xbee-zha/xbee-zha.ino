@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 #include <Bounce2.h>
-#include "devicemanager.h"
+#include <ZHA_DeviceManager.h>
+#include <ZHA_Devices/OnOffOutputDevice.h>
 #include <ESP8266WiFi.h>
 
 #define DEBUG

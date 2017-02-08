@@ -1,8 +1,8 @@
 #ifndef _ZHA_DEVICEMANAGER_H_
 #define _ZHA_DEVICEMANAGER_H_
 
-#include "device.h"
-#include "utils.h"
+#include "ZHA_Devices.h"
+#include "ZHA_Utils.h"
 
 #define ZHA_PROFILE_ID 0x0104
 

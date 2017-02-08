@@ -7,7 +7,7 @@
   #include "WProgram.h"
 #endif
 
-#include "attributes.h"
+#include "ZHA_Attributes.h"
 #include <LinkedList.h>
 
 /* ZHA profile cluster IDs */
