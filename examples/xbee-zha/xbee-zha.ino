@@ -18,7 +18,7 @@ IdentifyCluster identify_cluster;
 GroupsCluster groups_cluster;
 ScenesCluster scenes_cluster;
 LevelControlCluster level_cluster;
-ZLLCluster zll_cluster;
+ZLLCommissioningCluster zll_cluster;
 arduinoLED led_cluster;
 
 Bounce debouncer = Bounce();
