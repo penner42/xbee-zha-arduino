@@ -10,21 +10,20 @@
 #include "ZHA_Attributes.h"
 #include <LinkedList.h>
 
-class ZHA_Cluster { 
+class ZHA_Cluster {
 public:
-	ZHA_Cluster();
-	
+    ZHA_Cluster();
+
 	uint16_t getClusterId();
 	ZHA_Attribute* getAttrById(uint16_t attrId);
-  int getAttrIndexById(uint16_t attrId);
-  ZHA_Attribute* getAttrByIndex(int index);
-  uint8_t numAttributes() { return _attrs.size(); } 
-  virtual bool processCommand(uint8_t *frameData, uint8_t frameDataLength) = 0;
-      
-protected: 
-  LinkedList<ZHA_Attribute*> _attrs;
-	uint16_t _clusterId;
+    int getAttrIndexById(uint16_t attrId);
+    ZHA_Attribute* getAttrByIndex(int index);
+    uint8_t numAttributes() { return _attrs.size(); }
+    virtual bool processCommand(uint8_t *frameData, uint8_t frameDataLength) = 0;
 
+protected:
+    LinkedList<ZHA_Attribute*> _attrs;
+	uint16_t _clusterId;
 };
 
 #endif

@@ -31,7 +31,8 @@
 #define ZCL_WRITE_ATTRIBUTES_STRUCTURED_RESPONSE  0x10
 
 class ZHA_Device {
-public: 
+public:
+//  ZHA_Device() { };
   ZHA_Device(uint8_t endpointId);
 //  void setSerial(Stream &serial);
 //  void initializeModem();
@@ -50,7 +51,7 @@ public:
   bool processCommand(uint8_t *frameData, uint8_t frameDataLength, uint16_t clusterId, uint8_t *payload, uint8_t& _payload);    
   bool processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, uint16_t clusterId, uint8_t *payload, uint8_t& _payload);    
 
-private: 
+private:
   uint8_t _endpointId;
   LinkedList<ZHA_Cluster*>_inClusters;
   LinkedList<ZHA_Cluster*>_outClusters;
