@@ -24,10 +24,10 @@ void setup() {
     WiFi.mode(WIFI_OFF);
     Serial.begin(115200);
 
-    lightbulb.getOnOffCluster()->setOnCallback(on);
-    lightbulb.getOnOffCluster()->setOffCallback(off);
-    lightbulb.getOnOffCluster()->setToggleCallback(toggle);
-    lightbulb.getLevelControlCluster()->setMoveToLevelWithOnOffCallback(setLevel);
+    lightbulb.setOnCallback(on);
+    lightbulb.setOffCallback(off);
+    lightbulb.setToggleCallback(toggle);
+    lightbulb.setMoveToLevelWithOnOffCallback(setLevel);
     devmanager.addDevice(&lightbulb);
 
     pinMode(13, OUTPUT);
@@ -41,7 +41,7 @@ void setup() {
 
 void loop() {
     if (debouncer.update() && debouncer.read() == LOW) {
-        lightbulb.getOnOffCluster()->toggle();
+        lightbulb.toggle();
     }
     devmanager.loop();
 }
