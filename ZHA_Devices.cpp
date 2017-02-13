@@ -63,6 +63,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
        |-----------------------------------------
        | Frame Control  | Frame ID | Command ID |
        ------------------------------------------
+
        Response Frame Control Field
        -------------------------------------------------------------------------------
        |  Bits: 3 |            1             |     1     |       1      |      2     |
@@ -86,6 +87,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
           |-----------------------------------------------------------------------|
           | ZCL Header | Attribute ID 1 | Attribute ID 2 |  ...  | Attribute ID n |
           -------------------------------------------------------------------------
+
           Response payload
           ---------------------------------------------------------------------------
           |  Bits: 8   |    Variable     |    Variable     | ... |     Variable     |
@@ -122,6 +124,27 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
         }
         return true;
     } else if (command == ZCL_DISCOVER_ATTRIBUTES) {
+        /*
+          Command
+          -----------------------------------------------------------
+          |  Bits: 8   |      Bits: 16      |        Bits: 8        |
+          |----------------------------------------------------------
+          | ZCL Header | Start Attribute ID | Maximum Attribute IDs |
+          -----------------------------------------------------------
+
+          Response payload
+          --------------------------------------------------------------------------------------------------
+          |  Bits: 8   |         8          |     Variable     |     Variable     | ... |     Variable     |
+          |-------------------------------------------------------------------------------------------------
+          | ZCL Header | Discovery Complete | Attribute Info 1 | Attribute Info 2 | ... | Attribute Info n |
+          --------------------------------------------------------------------------------------------------
+          Attribute Info
+          ----------------------------
+          |   Bits: 16   |     1     |
+          ----------------------------
+          | Attribute Id | Data Type |
+          ----------------------------
+        */
         payloadLength = 4;
         payload[0] = 0b00011000;
         payload[1] = frameId;
@@ -142,9 +165,43 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
             payload[payloadLength + 2] = attr->getAttrType();
             payloadLength += 3;
         }
-        payload[3] = done;
+        payload[3] = (uint8_t) done;
         return true;
     } else if (command == ZCL_CONFIGURE_REPORTING) {
+        /*
+          Command
+          --------------------------------------------------------------------------------------
+          |  Bits: 8   |      Variable       |      Variable       | ... |      Variable       |
+          |-------------------------------------------------------------------------------------
+          | ZCL Header |  Attribute Record 1 |  Attribute Record 2 | ... |  Attribute Record n |
+          --------------------------------------------------------------------------------------
+          Attribute Record
+          ----------------------------------------------------------------------------------------------------------------------------------------
+          |  Bits: 8  |     16       |    0/8    |           0/16             |            0/16            |     0/Variable     |      0/16      |
+          |---------------------------------------------------------------------------------------------------------------------------------------
+          | Direction | Attribute ID | Data Type | Minimum Reporting Interval | Maximum Reporting Interval | Reeportable Change | Timeout Period |
+          |---------------------------------------------------------------------------------------------------------------------------------------
+          If Direction is 0x00: Uses fields Attribute Id, Data Type, Minimum Reporting Interval, Maximum Reporting Interval, Reportable Change
+                                Doesn't use field Timeout Period
+          If Direction is 0x01: Uses field Timeout Period
+                                Doesn't use fields Data Type, Minimum Reporting Interval, Maximum Reporting Interval, Reportable Change
+          For discrete (non-analog) data types, Reportable Change field is omitted.
+
+          Response payload
+          -----------------------------------------------------------------------------------
+          |  Bits: 8   |         32         |         32         | ... |         32         |
+          |----------------------------------------------------------------------------------
+          | ZCL Header | Attribute Record 1 | Attribute Record 2 | ... | Attribute Record n |
+          -----------------------------------------------------------------------------------
+          Attribute Record
+          --------------------------------------
+          | Bits: 8 |     8     |      16      |
+          --------------------------------------
+          | Status  | Direction | Attribute ID |
+          --------------------------------------
+          TODO:
+          If all attributes are configured for reporting successfully, just return a single record with status SUCCESS.
+        */
         payloadLength = 3;
         payload[0] = 0b00011000;
         payload[1] = frameId;
