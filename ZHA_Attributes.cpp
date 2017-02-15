@@ -90,7 +90,7 @@ uint8_t ZHA_Attribute::copyPayload(uint8_t *payload) {
       /* payload is length/size of value, followed by value */
       payload[0] = (uint8_t)_strValue.length();
       _strValue.getBytes((byte*)&payload[1], _strValue.length()+1);
-      printHex(Serial, payload, _strValue.length() + 1);
+//      printHex(Serial, payload, _strValue.length() + 1);
       return _strValue.length() + 1;
       break;
     default:

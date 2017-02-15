@@ -1,5 +1,5 @@
 #include "ZHA_Devices.h"
-
+#define DEBUG
 ZHA_Device::ZHA_Device(uint8_t endpointId) {
     _endpointId = endpointId;
 }
@@ -102,12 +102,21 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
           | Attribute Id | Status | Data Type |   Value    |
           --------------------------------------------------
         */
+
+#ifdef DEBUG
+        Serial.print("Read attributes ");
+#endif
+
         payloadLength = 3;
         payload[0] = 0b00011000;
         payload[1] = frameId;
         payload[2] = ZCL_READ_ATTRIBUTES_RESPONSE;
         for (uint8_t i = 3; i < frameDataLength; i += 2) {
             uint16_t attrId = ((uint16_t) frameData[i + 1] << 8) | frameData[i];
+#ifdef DEBUG
+            Serial.print(attrId);
+            Serial.print(" ");
+#endif
             ZHA_Attribute *attr = cluster->getAttrById(attrId);
             if (attr == NULL) {
                 /* attribute is undefined */
@@ -122,6 +131,10 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
                 payloadLength += attr->copyPayload((uint8_t *) &payload[payloadLength]);
             }
         }
+#ifdef DEBUG
+        Serial.print("from cluster ");
+        Serial.println(clusterId);
+#endif
         return true;
     } else if (command == ZCL_DISCOVER_ATTRIBUTES) {
         /*
@@ -145,6 +158,9 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
           | Attribute Id | Data Type |
           ----------------------------
         */
+#ifdef DEBUG
+        Serial.print("Discover attributes ");
+#endif
         payloadLength = 4;
         payload[0] = 0b00011000;
         payload[1] = frameId;
@@ -156,7 +172,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
         bool done = false;
         ZHA_Attribute *attr;
         for (uint8_t i = 0; i < max_attrs; i++) {
-            if (i + attr_index + 1 > num_attrs) {
+            if ((attr_index == -1) || (i + attr_index + 1 > num_attrs)) {
                 done = true;
                 break;
             }
@@ -166,6 +182,10 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
             payloadLength += 3;
         }
         payload[3] = (uint8_t) done;
+#ifdef DEBUG
+        Serial.print("from cluster ");
+        Serial.println(clusterId);
+#endif
         return true;
     } else if (command == ZCL_CONFIGURE_REPORTING) {
         /*
@@ -202,17 +222,23 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
           TODO:
           If all attributes are configured for reporting successfully, just return a single record with status SUCCESS.
         */
+#ifdef DEBUG
+        Serial.print("Configure reporting for attributes ");
+#endif
         payloadLength = 3;
         payload[0] = 0b00011000;
         payload[1] = frameId;
         payload[2] = ZCL_CONFIGURE_REPORTING_RESPONSE;
         uint8_t i = 3;
-        Serial.println(frameDataLength);
         while (i < frameDataLength) {
             if (frameData[i] == 0x00) {
                 /* send reports */
                 uint16_t attrId = ((uint16_t) frameData[i + 2] << 8) | frameData[i + 1];
                 ZHA_Attribute *attr = cluster->getAttrById(attrId);
+#ifdef DEBUG
+                Serial.print(attrId);
+                Serial.print(" ");
+#endif
                 if (attr) {
                     uint8_t datatype = frameData[i + 3];
                     uint16_t minimum_interval = ((uint16_t) frameData[i + 5] << 8) | frameData[i + 4];
@@ -230,6 +256,10 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
                 /* receive reports */
             }
         }
+#ifdef DEBUG
+        Serial.print("from cluster ");
+        Serial.println(clusterId);
+#endif
         return true;
     } else {
         return false;
@@ -254,7 +284,7 @@ bool ZHA_Device::processCommand(uint8_t *frameData, uint8_t frameDataLength, uin
     uint8_t frametype = frameData[0] & 0b11;
     if (frametype == 0b00) {
         /* general command frame */
-        Serial.println("general command");
+//        Serial.println("general command");
         return processGeneralCommand(frameData, frameDataLength, clusterId, payload, payloadLength);
     } else if (frametype == 0b01) {
         /* cluster specific command frame */

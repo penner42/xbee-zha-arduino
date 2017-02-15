@@ -1493,7 +1493,7 @@ uint8_t RemoteAtCommandRequest::getFrameDataLength() {
 
 void XBee::send(XBeeRequest &request) {
 	// the new new deal
-  Serial.print("Sending: ");
+//  Serial.print("Sending: ");
 	sendByte(START_BYTE, false);
 
 	// send length
@@ -1523,7 +1523,7 @@ void XBee::send(XBeeRequest &request) {
 
 	// send checksum
 	sendByte(checksum, true);
- Serial.println();
+// Serial.println();
 }
 
 void XBee::sendByte(uint8_t b, bool escape) {
@@ -1531,16 +1531,16 @@ void XBee::sendByte(uint8_t b, bool escape) {
 		write(ESCAPE);
 		write(b ^ 0x20);
 
-    if (b < 0x10) 
-      Serial.print("0");
-    Serial.print(b, HEX);
-    Serial.print(" ");
+//    if (b < 0x10)
+//      Serial.print("0");
+//    Serial.print(b, HEX);
+//    Serial.print(" ");
 	} else {
 		write(b);
-    if (b < 0x10)
-      Serial.print("0");
-    Serial.print(b, HEX);
-    Serial.print(" ");
+//    if (b < 0x10)
+//      Serial.print("0");
+//    Serial.print(b, HEX);
+//    Serial.print(" ");
   }
 }
 

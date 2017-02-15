@@ -1,10 +1,10 @@
 #include "ZHA_DeviceManager.h"
-
+#define DEBUG
 ZHA_DeviceManager::ZHA_DeviceManager() : _addr64(0), _bcast64(0) {
     _addr16 = 0;
     _bcast16 = 0;
 
-    onResponse(printResponseCb, (uintptr_t) (Print * ) & Serial);
+//    onResponse(printResponseCb, (uintptr_t) (Print * ) & Serial);
     onModemStatusResponse(modemStatusCb, (uintptr_t) this);
     onAtCommandResponse(atCommandCb, (uintptr_t) this);
     onPacketError(printErrorCb, (uintptr_t) (Print * ) & Serial);
@@ -82,6 +82,9 @@ ZHA_Device *ZHA_DeviceManager::getDeviceByEndpoint(uint8_t endpointId) {
 void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t clusterId, uint8_t *frameData,
                                    uint8_t frameDataLength) {
     if (clusterId == ZDO_SIMPLE_DESCRIPTOR_REQUEST) {
+#ifdef DEBUG
+        Serial.println("ZDO Simple Descriptor Request");
+#endif
         _addr16 = ((uint16_t) frameData[2] << 8) | frameData[1];
         ZHA_Device *dev = getDeviceByEndpoint(frameData[3]);
         if (dev) {
@@ -112,6 +115,9 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
             send(SDR);
         }
     } else if (clusterId == ZDO_ACTIVE_ENDPOINTS_REQUEST) {
+#ifdef DEBUG
+        Serial.println("ZDO Active Endpoints Request");
+#endif
         _addr16 = ((uint16_t) frameData[2] << 8) | frameData[1];
         _payload[0] = frameData[0];
         _payload[1] = STATUS_SUCCESS;
@@ -125,6 +131,9 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
                                       ZDO_ACTIVE_ENDPOINTS_RESPONSE, 0);
         send(endpoints);
     } else if (clusterId == ZDO_MATCH_DESCRIPTOR_REQUEST) {
+#ifdef DEBUG
+        Serial.println("ZDO Match Descriptor Request");
+#endif
         _addr16 = ((uint16_t) frameData[2] << 8) | frameData[1];
         uint16_t profile_id = ((uint16_t) frameData[4] << 8) | frameData[3];
         uint8_t numInClusters = frameData[5];

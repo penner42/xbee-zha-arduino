@@ -51,7 +51,7 @@ LeveLControlOutputDevice::LeveLControlOutputDevice(uint8_t endpointId) : ZHA_Dev
     addInCluster(&groups_cluster);
     addInCluster(&scenes_cluster);
     addInCluster(&level_cluster);
-    addInCluster(&zll_cluster);
+//    addInCluster(&zll_cluster);
 }
 
 #endif //XBEEZHA_LEVELCONTROLOUTPUTDEVICE_H

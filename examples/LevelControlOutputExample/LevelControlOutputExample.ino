@@ -1,10 +1,10 @@
+#define DEBUG
+
 #include <SoftwareSerial.h>
 #include <Bounce2.h>
 #include <ZHA_DeviceManager.h>
 #include <ZHA_Devices/LevelControlOutputDevice.h>
 #include <ESP8266WiFi.h>
-
-#define DEBUG
 
 void on() { digitalWrite(13, HIGH); }
 void off() { digitalWrite(13, LOW); }
