@@ -83,7 +83,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
         /*
           Command
           -------------------------------------------------------------------------
-          |  Bits: 8   |    Bits: 16    |    Bits: 16    |  ...  |    Bits: 16    |
+          |  Bits: 24  |    Bits: 16    |    Bits: 16    |  ...  |    Bits: 16    |
           |-----------------------------------------------------------------------|
           | ZCL Header | Attribute ID 1 | Attribute ID 2 |  ...  | Attribute ID n |
           -------------------------------------------------------------------------
@@ -127,14 +127,14 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
         /*
           Command
           -----------------------------------------------------------
-          |  Bits: 8   |      Bits: 16      |        Bits: 8        |
+          |  Bits: 24  |      Bits: 16      |        Bits: 8        |
           |----------------------------------------------------------
           | ZCL Header | Start Attribute ID | Maximum Attribute IDs |
           -----------------------------------------------------------
 
           Response payload
           --------------------------------------------------------------------------------------------------
-          |  Bits: 8   |         8          |     Variable     |     Variable     | ... |     Variable     |
+          |  Bits: 24   |         8          |     Variable     |     Variable     | ... |     Variable     |
           |-------------------------------------------------------------------------------------------------
           | ZCL Header | Discovery Complete | Attribute Info 1 | Attribute Info 2 | ... | Attribute Info n |
           --------------------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
         /*
           Command
           --------------------------------------------------------------------------------------
-          |  Bits: 8   |      Variable       |      Variable       | ... |      Variable       |
+          |  Bits: 24  |      Variable       |      Variable       | ... |      Variable       |
           |-------------------------------------------------------------------------------------
           | ZCL Header |  Attribute Record 1 |  Attribute Record 2 | ... |  Attribute Record n |
           --------------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
 
           Response payload
           -----------------------------------------------------------------------------------
-          |  Bits: 8   |         32         |         32         | ... |         32         |
+          |  Bits: 24  |         32         |         32         | ... |         32         |
           |----------------------------------------------------------------------------------
           | ZCL Header | Attribute Record 1 | Attribute Record 2 | ... | Attribute Record n |
           -----------------------------------------------------------------------------------
