@@ -19,6 +19,7 @@
 class LeveLControlOutputDevice : public ZHA_Device {
 public:
     LeveLControlOutputDevice(uint8_t endpointId);
+    BasicCluster *getBasicCluster() { return &basic_cluster; }
     OnOffCluster *getOnOffCluster() { return &onoff_cluster; }
     LevelControlCluster *getLevelControlCluster() { return &level_cluster; }
 
@@ -40,7 +41,6 @@ private:
     GroupsCluster groups_cluster;
     ScenesCluster scenes_cluster;
     LevelControlCluster level_cluster;
-    ZLLCommissioningCluster zll_cluster;
 };
 
 LeveLControlOutputDevice::LeveLControlOutputDevice(uint8_t endpointId) : ZHA_Device(endpointId) {
@@ -51,7 +51,6 @@ LeveLControlOutputDevice::LeveLControlOutputDevice(uint8_t endpointId) : ZHA_Dev
     addInCluster(&groups_cluster);
     addInCluster(&scenes_cluster);
     addInCluster(&level_cluster);
-//    addInCluster(&zll_cluster);
 }
 
 #endif //XBEEZHA_LEVELCONTROLOUTPUTDEVICE_H

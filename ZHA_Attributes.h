@@ -32,7 +32,9 @@ class ZHA_Attribute {
     bool     needsReporting();
     void     markReported();
     void set(uint64_t value);
+    void set(String value);
     uint8_t copyPayload(uint8_t *payload);
+    String toString();
 
     uint16_t getAttrSize();
 

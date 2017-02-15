@@ -28,6 +28,10 @@ void setup() {
     lightbulb.setOffCallback(off);
     lightbulb.setToggleCallback(toggle);
     lightbulb.setMoveToLevelWithOnOffCallback(setLevel);
+    lightbulb.getBasicCluster()->setAttribute(BASIC_CLUSTER_ATTRIBUTE_MANUFACTURER_NAME, ZHA_TYPE_CHARACTER_STRING,
+                                              String("GE_Appliances"));
+    lightbulb.getBasicCluster()->setAttribute(BASIC_CLUSTER_ATTRIBUTE_MODEL_IDENTIFIER, ZHA_TYPE_CHARACTER_STRING,
+                                              String("ZLL Light"));
     devmanager.addDevice(&lightbulb);
 
     pinMode(13, OUTPUT);

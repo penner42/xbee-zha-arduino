@@ -75,6 +75,11 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
     */
     uint8_t frameId = frameData[1];
     uint8_t command = frameData[2];
+#ifdef DEBUG
+    String commandStr;
+    String responseStr;
+#endif
+
     ZHA_Cluster *cluster = getInClusterById(clusterId);
     if (!cluster) {
         return false;
@@ -104,7 +109,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
         */
 
 #ifdef DEBUG
-        Serial.print("Read attributes ");
+        commandStr += String("Read attributes ");
 #endif
 
         payloadLength = 3;
@@ -114,12 +119,14 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
         for (uint8_t i = 3; i < frameDataLength; i += 2) {
             uint16_t attrId = ((uint16_t) frameData[i + 1] << 8) | frameData[i];
 #ifdef DEBUG
-            Serial.print(attrId);
-            Serial.print(" ");
+            commandStr += String(attrId) + String(" ");
 #endif
             ZHA_Attribute *attr = cluster->getAttrById(attrId);
             if (attr == NULL) {
                 /* attribute is undefined */
+#ifdef DEBUG
+                responseStr += String("Attribute ") + String(attrId) + String(" unsupported\n");
+#endif
                 copyHexL(&payload[payloadLength], attrId);
                 payload[payloadLength + 2] = STATUS_UNSUPPORTED_ATTRIBUTE;
                 payloadLength += 3;
@@ -129,11 +136,15 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
                 payload[payloadLength + 3] = attr->getAttrType();
                 payloadLength += 4;
                 payloadLength += attr->copyPayload((uint8_t *) &payload[payloadLength]);
+#ifdef DEBUG
+                responseStr += String("Attribute ") + String(attrId) + String(" ") + attr->toString() + "\n";
+#endif
             }
         }
 #ifdef DEBUG
-        Serial.print("from cluster ");
-        Serial.println(clusterId);
+        commandStr += String("from Cluster ") + String(clusterId);
+        Serial.println(commandStr);
+        Serial.println(responseStr);
 #endif
         return true;
     } else if (command == ZCL_DISCOVER_ATTRIBUTES) {
@@ -159,7 +170,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
           ----------------------------
         */
 #ifdef DEBUG
-        Serial.print("Discover attributes ");
+        commandStr += String("Discover attributes: Start: ");
 #endif
         payloadLength = 4;
         payload[0] = 0b00011000;
@@ -169,6 +180,10 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
         uint8_t max_attrs = frameData[5];
         uint8_t attr_index = cluster->getAttrIndexById(first_attr);
         uint8_t num_attrs = cluster->numAttributes();
+#ifdef DEBUG
+        commandStr += String(first_attr) + String(" Max: ") + String(max_attrs) + String(" from cluster ") +
+                String(clusterId);
+#endif
         bool done = false;
         ZHA_Attribute *attr;
         for (uint8_t i = 0; i < max_attrs; i++) {
@@ -180,11 +195,20 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
             copyHexL(&payload[payloadLength], attr->getAttrId());
             payload[payloadLength + 2] = attr->getAttrType();
             payloadLength += 3;
+#ifdef DEBUG
+            responseStr += String("Attribute ") + String(attr->getAttrId()) + String(" Type: ") +
+                           String(attr->getAttrType()) + "\n";
+#endif
         }
         payload[3] = (uint8_t) done;
 #ifdef DEBUG
-        Serial.print("from cluster ");
-        Serial.println(clusterId);
+        if (done) {
+            responseStr += String("Discovery complete.");
+        } else {
+            responseStr += String("Discovery incomplete.");
+        };
+        Serial.println(commandStr);
+        Serial.println(responseStr);
 #endif
         return true;
     } else if (command == ZCL_CONFIGURE_REPORTING) {
@@ -223,7 +247,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
           If all attributes are configured for reporting successfully, just return a single record with status SUCCESS.
         */
 #ifdef DEBUG
-        Serial.print("Configure reporting for attributes ");
+        commandStr += String("Configure reporting for attributes ");
 #endif
         payloadLength = 3;
         payload[0] = 0b00011000;
@@ -236,8 +260,7 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
                 uint16_t attrId = ((uint16_t) frameData[i + 2] << 8) | frameData[i + 1];
                 ZHA_Attribute *attr = cluster->getAttrById(attrId);
 #ifdef DEBUG
-                Serial.print(attrId);
-                Serial.print(" ");
+                commandStr += String(attrId) + String(" ");
 #endif
                 if (attr) {
                     uint8_t datatype = frameData[i + 3];
@@ -251,17 +274,23 @@ ZHA_Device::processGeneralCommand(uint8_t *frameData, uint8_t frameDataLength, u
                     payload[payloadLength++] = STATUS_SUCCESS;
                     payload[payloadLength++] = 0x00;
                     copyHexL(&payload[payloadLength++], attrId);
+                    responseStr += String("Success");
                 }
             } else if (frameData[i] == 0x01) {
                 /* receive reports */
             }
         }
 #ifdef DEBUG
-        Serial.print("from cluster ");
-        Serial.println(clusterId);
+        commandStr += String("from cluster ") + String(clusterId);
+        Serial.println(commandStr);
+        Serial.println(responseStr);
 #endif
         return true;
     } else {
+#ifdef DEBUG
+        Serial.print("Received unimplemented command ");
+        Serial.println(command);
+#endif
         return false;
     }
 }
@@ -288,7 +317,7 @@ bool ZHA_Device::processCommand(uint8_t *frameData, uint8_t frameDataLength, uin
         return processGeneralCommand(frameData, frameDataLength, clusterId, payload, payloadLength);
     } else if (frametype == 0b01) {
         /* cluster specific command frame */
-        Serial.println("cluster specific command");
+//        Serial.println("cluster specific command");
         ZHA_Cluster *cluster = getInClusterById(clusterId);
         cluster->processCommand(frameData, frameDataLength);
     }
