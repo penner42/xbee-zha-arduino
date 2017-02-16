@@ -90,7 +90,7 @@ void ZHA_DeviceManager::processZDO(XBeeAddress64 dst64, uint16_t dst16, uint16_t
         if (dev) {
             uint8_t numInClusters = dev->getNumInClusters();
             uint8_t numOutClusters = dev->getNumOutClusters();
-            _payloadLength = 12; //13 + (2 * (numInClusters + numOutClusters));
+            _payloadLength = 12;
             _payload[0] = frameData[0];
             _payload[1] = STATUS_SUCCESS;
             copyHexL(&_payload[2], _addr16);

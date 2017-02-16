@@ -19,7 +19,7 @@ private:
 };
 
 GroupsCluster::GroupsCluster() {
-    _attrs.add(new ZHA_Attribute(GROUPS_CLUSTER_ATTRIBUTE_NAME_SUPPORT, ZHA_TYPE_8BIT_BITMAP, 0x0000));
+    _attrs.add(new ZHA_Attribute(GROUPS_CLUSTER_ATTRIBUTE_NAME_SUPPORT, ZHA_TYPE_BITMAP8, 0x0000));
     _clusterId = GROUPS_CLUSTER_ID;
 }
 #endif //XBEEZHA_GROUPSCLUSTER_H

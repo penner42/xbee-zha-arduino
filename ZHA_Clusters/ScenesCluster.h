@@ -27,7 +27,7 @@ ScenesCluster::ScenesCluster() {
     _attrs.add(new ZHA_Attribute(SCENES_CLUSTER_ATTRIBUTE_CURRENT_SCENE, ZHA_TYPE_UINT8,  0x00));
     _attrs.add(new ZHA_Attribute(SCENES_CLUSTER_ATTRIBUTE_CURRENT_GROUP, ZHA_TYPE_UINT16, 0x0000));
     _attrs.add(new ZHA_Attribute(SCENES_CLUSTER_ATTRIBUTE_SCENE_VALID,   ZHA_TYPE_BOOL,   0x00));
-    _attrs.add(new ZHA_Attribute(SCENES_CLUSTER_ATTRIBUTE_NAME_SUPPORT,  ZHA_TYPE_8BIT_BITMAP, 0x0000));
+    _attrs.add(new ZHA_Attribute(SCENES_CLUSTER_ATTRIBUTE_NAME_SUPPORT,  ZHA_TYPE_BITMAP8, 0x0000));
     _clusterId = SCENES_CLUSTER_ID;
 }
 

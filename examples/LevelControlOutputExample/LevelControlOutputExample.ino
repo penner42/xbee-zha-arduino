@@ -4,7 +4,9 @@
 #include <Bounce2.h>
 #include <ZHA_DeviceManager.h>
 #include <ZHA_Devices/LevelControlOutputDevice.h>
+#ifdef ESP8266
 #include <ESP8266WiFi.h>
+#endif
 
 void on() { digitalWrite(13, HIGH); }
 void off() { digitalWrite(13, LOW); }
@@ -21,17 +23,17 @@ ZHA_DeviceManager devmanager;
 LeveLControlOutputDevice lightbulb(0x8);
 
 void setup() {
+#ifdef ESP8266
     WiFi.mode(WIFI_OFF);
+#endif
     Serial.begin(115200);
 
     lightbulb.setOnCallback(on);
     lightbulb.setOffCallback(off);
     lightbulb.setToggleCallback(toggle);
     lightbulb.setMoveToLevelWithOnOffCallback(setLevel);
-    lightbulb.getBasicCluster()->setAttribute(BASIC_CLUSTER_ATTRIBUTE_MANUFACTURER_NAME, ZHA_TYPE_CHARACTER_STRING,
-                                              String("GE_Appliances"));
-    lightbulb.getBasicCluster()->setAttribute(BASIC_CLUSTER_ATTRIBUTE_MODEL_IDENTIFIER, ZHA_TYPE_CHARACTER_STRING,
-                                              String("ZLL Light"));
+    lightbulb.getBasicCluster()->setManufacturerName(String("GE_Appliances"));
+    lightbulb.getBasicCluster()->setModelIdentifier(String("ZLL Light"));
     devmanager.addDevice(&lightbulb);
 
     pinMode(13, OUTPUT);
