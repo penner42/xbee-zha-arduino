@@ -16,6 +16,9 @@
 class OnOffOutputDevice:public ZHA_Device {
 public:
     OnOffOutputDevice(uint8_t endpointId);
+
+    BasicCluster *getBasicCluster() { return &basic_cluster; }
+
     void on() { onoff_cluster.on(); }
     void off() { onoff_cluster.off(); }
     void toggle() { onoff_cluster.toggle(); }
@@ -23,6 +26,7 @@ public:
     void setOnCallback(void (*onCallback)()) { onoff_cluster.setOnCallback(onCallback); }
     void setOffCallback(void (*offCallback)()) { onoff_cluster.setOffCallback(offCallback); }
     void setToggleCallback(void (*toggleCallback)()) { onoff_cluster.setToggleCallback(toggleCallback); }
+
 
 private:
     BasicCluster    basic_cluster;

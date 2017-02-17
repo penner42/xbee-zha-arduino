@@ -2,7 +2,9 @@
 #include <Bounce2.h>
 #include <ZHA_DeviceManager.h>
 #include <ZHA_Devices/OnOffOutputDevice.h>
+#ifdef ESP8266
 #include <ESP8266WiFi.h>
+#endif
 
 #define DEBUG
 
@@ -17,13 +19,16 @@ ZHA_DeviceManager devmanager;
 OnOffOutputDevice lightbulb(0x8);
 
 void setup() {
+#ifdef ESP8266
     WiFi.mode(WIFI_OFF);
+#endif
     Serial.begin(115200);
 
     lightbulb.setOnCallback(on);
     lightbulb.setOffCallback(off);
     lightbulb.setToggleCallback(toggle);
-
+    lightbulb.getBasicCluster()->setManufacturerName(String("Leviton"));
+    lightbulb.getBasicCluster()->setModelIdentifier(String("ZSS-10"));
     devmanager.addDevice(&lightbulb);
 
     pinMode(13, OUTPUT);

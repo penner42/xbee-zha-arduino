@@ -18,6 +18,7 @@
 class LeveLControlOutputDevice : public ZHA_Device {
 public:
     LeveLControlOutputDevice(uint8_t endpointId);
+
     BasicCluster *getBasicCluster() { return &basic_cluster; }
     OnOffCluster *getOnOffCluster() { return &onoff_cluster; }
     LevelControlCluster *getLevelControlCluster() { return &level_cluster; }
@@ -33,8 +34,10 @@ public:
     setMoveToLevelWithOnOffCallback(void (*movetoLevelWithOnOffCallback)(uint8_t level, uint16_t transition_time)) {
         level_cluster.setMoveToLevelWithOnOffCallback(movetoLevelWithOnOffCallback);
     }
+
+
 private:
-    BasicCluster basic_cluster;
+    BasicCluster basic_clsuter;
     IdentifyCluster identify_cluster;
     OnOffCluster onoff_cluster;
     GroupsCluster groups_cluster;

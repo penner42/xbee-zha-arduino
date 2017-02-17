@@ -21,6 +21,13 @@ public:
     void off();
     void toggle();
 
+    // Attribute set functions
+    void setOnOffAttribute(bool onoff);
+
+    // Attribute get functions
+    bool getOnOffAttribute();
+
+    // Callback set functions
     void setOnCallback(void (*onCallback)()) { _onCallback = onCallback; }
     void setOffCallback(void (*offCallback)()) { _offCallback = offCallback; }
     void setToggleCallback(void (*toggleCallback)()) { _toggleCallback = toggleCallback; }
@@ -46,15 +53,28 @@ void OnOffCluster::off() {
 }
 
 void OnOffCluster::toggle() {
-    getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->set((uint64_t)(!(getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF)->getValueBool())));
+    setOnOffAttribute(!getOnOffAttribute());
     if (_toggleCallback) {
         _toggleCallback();
     }
 }
 
+void OnOffCluster::setOnOffAttribute(bool onoff) {
+    setAttribute(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF, ZHA_TYPE_BOOL, onoff);
+}
+
+bool OnOffCluster::getOnOffAttribute() {
+    ZHA_Attribute *attr = getAttrById(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF);
+    if (attr) {
+        return attr->getValueBool();
+    } else {
+        return false;
+    }
+}
+
 OnOffCluster::OnOffCluster() {
     /* mandatory attributes, default values */
-    _attrs.add(new ZHA_Attribute(ON_OFF_CLUSTER_ATTRIBUTE_ON_OFF, ZHA_TYPE_BOOL, 0x0));
+    setOnOffAttribute(0x0);
     _onCallback = _offCallback = _toggleCallback = NULL;
     _clusterId = ON_OFF_CLUSTER_ID;
 }
